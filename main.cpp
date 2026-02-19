@@ -335,7 +335,7 @@ int main() {
                 }
             }
         }
-        cout << "Mouse position:" << mouseX << "," << mouseY << "\n";
+        cout << "Mouse position (x,y):" << mouseX << ", " << mouseY << "\n";
         cout << "";
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
