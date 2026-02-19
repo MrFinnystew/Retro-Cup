@@ -336,14 +336,13 @@ int main() {
             }
         }
         cout << "Mouse position (x,y):" << mouseX << ", " << mouseY << "\n";
-        cout << "";
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, debugField.Texture, NULL, &debugField.rect);
         SDL_RenderCopy(renderer, debugMidfielder.Texture, NULL, &debugMidfielder.rect);
         SDL_RenderPresent(renderer);
     }
-    cout << "";
+    cout << "Exited loop...";
     
     cout << "Destroying images...";
     SDL_DestroyTexture(debugMidfielder.Texture);
