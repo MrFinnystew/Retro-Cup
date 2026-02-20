@@ -249,11 +249,31 @@ float getSpriteScale(Sprite& sprite) {
     return scaleX;  // Returns how many game pixels per image pixel
 }
 
+bool isCommonMultiple(int Number, int Multiple) {
+    if ((Number % Multiple) == 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 //-----------------------------------------------------------------
 //-----------------------------int Main----------------------------
 //-----------------------------------------------------------------
 
 int main() {
+#if defined(__APPLE__)
+    string operatingSystem = "Apple";
+#elif defined(__linux__)
+    string operatingSystem = "Linux";
+#elif defined(_WIN32)
+    string operatingSystem = "Windows";
+#else
+    cout << "Operating System not allowed.\nError";
+    return -1;
+#endif
+    cout << "Operating System: " << operatingSystem << endl;
     //-----------------------------------------------
     //-----------------Load Window-------------------
     //-----------------------------------------------
@@ -292,12 +312,15 @@ int main() {
     
     while (!WindowShouldClose) {
         loopNumber += 1;
-        cout <<
-        "---------------------------------------------------------------\n" <<
-        "--------------- Loop #" << loopNumber << "---------------------\n" <<
-        "---------------------------------------------------------------\n";
+        // Only shows every 120 loops
+        if (isCommonMultiple(loopNumber,120)) {
+            cout <<
+            "---------------------------------------------------------------\n" <<
+            "--------------- Loop #" << loopNumber << "---------------------\n" <<
+            "---------------------------------------------------------------\n";
+        }
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) WindowShouldClose = false;
+            if (event.type == SDL_QUIT) WindowShouldClose = true;
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
@@ -335,14 +358,17 @@ int main() {
                 }
             }
         }
-        cout << "Mouse position (x,y):" << mouseX << ", " << mouseY << "\n";
+        if (isCommonMultiple(loopNumber,120)) {
+            cout << "Mouse position:" << mouseX << "," << mouseY << "\n";
+        }
+        cout << "";
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, debugField.Texture, NULL, &debugField.rect);
         SDL_RenderCopy(renderer, debugMidfielder.Texture, NULL, &debugMidfielder.rect);
         SDL_RenderPresent(renderer);
     }
-    cout << "Exited loop...";
+    cout << "";
     
     cout << "Destroying images...";
     SDL_DestroyTexture(debugMidfielder.Texture);
