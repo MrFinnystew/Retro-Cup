@@ -179,6 +179,26 @@ typedef enum {
     ALL
 } animationType;
 
+typedef enum {
+    FIELD_NONE,
+    
+    DEBUG_FIELD,
+    DEBUG_FIELD_SNOW,
+    DEBUG_FIELD_RAIN,
+    
+    NORMAL_FIELD,
+    NORMAL_FIELD_SNOW,
+    NORMAL_FIELD_RAIN,
+} fieldType;
+
+typedef enum {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    JUMP,
+} moveType;
+
 /*-----------------------------------------------------------------
   ------------------------------Structs----------------------------
   -----------------------------------------------------------------*/
@@ -255,11 +275,6 @@ typedef struct Animation {
 } Animation;
 
 typedef struct humanSprite {
-    int spriteWidth;
-    int spriteHeight;
-    string pathToFile;
-    string fileName;
-    string uiFileName;
     SDL_Texture* Texture;
     bool normalTextureIsLoaded;
     bool allAnimationsAreLoaded;
@@ -269,6 +284,30 @@ typedef struct humanSprite {
     bool blueCard;
     Animation animaion;
 } humanInfo;
+
+typedef struct individualFieldTexture {
+    SDL_Texture* normal;
+    bool normalIsLoaded;
+    SDL_Texture* snow;
+    bool snowIsLoaded;
+    SDL_Texture* rain;
+    bool rainIsLoaded;
+} individualFieldTexture;
+
+typedef struct fieldTextures {
+    individualFieldTexture normal;
+    bool normalIsLoaded;
+    individualFieldTexture debug;
+    bool debugIsLoaded;
+} fieldTextures;
+
+typedef struct fieldSprite {
+    string spriteName;
+    bool allFieldsAreLoaded;
+    
+    SDL_Rect rect;
+    fieldTextures textures;
+} fieldSprite;
 
 typedef struct rectangle {
     int width;
@@ -1660,6 +1699,70 @@ public:
         info.rect.x = x * pixelsPerGamePixels;
         info.rect.y = y * pixelsPerGamePixels;
     }
+    
+    void move(moveType type) {
+        if (type == UP) {
+            goTo(info.rect.x, info.rect.y+1);
+        }
+        else if (type == DOWN) {
+            goTo(info.rect.x, info.rect.y-1);
+        }
+        else if (type == LEFT) {
+            goTo(info.rect.x-1, info.rect.y);
+        }
+        else if (type == RIGHT) {
+            goTo(info.rect.x+1, info.rect.y);
+        }
+    }
+};
+
+class field {
+public:
+    fieldSprite info;
+    animationType currentFieldType = NONE;
+    string spriteName;
+    
+    void init(string importedSpriteName) {
+        spriteName = importedSpriteName;
+        goTo(0, 0);
+    }
+    
+    void goTo(int x, int y) {
+        info.rect.x = x * pixelsPerGamePixels;
+        info.rect.y = y * pixelsPerGamePixels;
+    }
+    
+    void load(string pathToFile, fieldType type) {
+        if (type == DEBUG_FIELD) {
+            info.textures.debug.normal = IMG_LoadTexture(renderer, pathToFile.c_str());
+        }
+    }
+    
+    void unload(fieldType type) {
+        if (type == DEBUG_FIELD) {
+            SDL_DestroyTexture(info.textures.debug.normal);
+        }
+    }
+    
+    void display(fieldType type) {
+        resizeForFrame(type);
+        if (type == DEBUG_FIELD) {
+            SDL_RenderCopy(renderer, info.textures.debug.normal, NULL, &info.rect);
+        }
+    }
+    
+    void resizeForFrame(fieldType type) {
+        int imgW, imgH;
+        if (type == DEBUG_FIELD) {
+            SDL_QueryTexture(info.textures.debug.normal, NULL, NULL, &imgW, &imgH);
+        }
+        else {
+            imgH = 0;
+            imgW = 0;
+        }
+        info.rect.h = imgH * pixelsPerGamePixels;
+        info.rect.w = imgW * pixelsPerGamePixels;
+    }
 };
 
 /*-----------------------------------------------------------------
@@ -1704,7 +1807,7 @@ int main() {
         cout << "Pixels: " << screenSize.pixels << endl;
     }
     
-    string windowName = "Retro Cup | vBeta 0.1.2 | Last updated: 2/24/2026";
+    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
     
     window = SDL_CreateWindow(windowName.c_str(),
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -1721,9 +1824,13 @@ int main() {
      Load sprites:
      */
     
-    human debugSprite;
+    field debugSprite;
     debugSprite.init("debugSprite");
-    debugSprite.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField/debugField.png"}, NORMAL);
+    debugSprite.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField.png", DEBUG_FIELD);
+    
+    human debugPlayer;
+    debugPlayer.init("debugPlayer");
+    debugPlayer.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
         
     bool WindowShouldClose = false;
     SDL_Event event;
@@ -1751,6 +1858,22 @@ int main() {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) WindowShouldClose = true;
             if (event.type == SDL_KEYDOWN) {
+                if (event.key.type == SDLK_w) {
+                    debugPlayer.move(UP);
+                    print("Key detected! UP\n");
+                }
+                if (event.key.type == SDLK_a) {
+                    debugPlayer.move(LEFT);
+                    print("Key detected! LEFT\n");
+                }
+                if (event.key.type == SDLK_s) {
+                    debugPlayer.move(DOWN);
+                    print("Key detected! DOWN\n");
+                }
+                if (event.key.type == SDLK_d) {
+                    debugPlayer.move(RIGHT);
+                    print("Key detected! RIGHT\n");
+                }
             }
             if (event.type == SDL_MOUSEMOTION) {
                 mouseX = event.motion.x;
@@ -1773,7 +1896,10 @@ int main() {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
-        debugSprite.display(NORMAL);
+        debugSprite.display(DEBUG_FIELD);
+        debugPlayer.goTo(-3, 0);
+        debugPlayer.display(NORMAL);
+        
         SDL_RenderPresent(renderer);
     }
     if (debugMode)
@@ -1781,6 +1907,7 @@ int main() {
     
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    debugSprite.unload(DEBUG_FIELD);
     
     IMG_Quit();
     SDL_Quit();
