@@ -52,6 +52,8 @@ Notes are set up like C++
 #include <limits>
 #include <cmath>
 
+#include "Color Text.hpp"
+
 /* Are using these: */
 using
 std::cout,
@@ -332,6 +334,11 @@ float zoom;
 /*-----------------------------------------------------------------
   -----------------------------Functions---------------------------
   -----------------------------------------------------------------*/
+
+void error(string errorMessage) {
+    if (debugMode)
+        cout << (startText+startBoldText+redText+endText) << errorMessage << resetText;
+}
 
 int RandomInt(int low, int high) {
     /* 1. Obtain a random seed from the hardware or OS
@@ -757,7 +764,7 @@ public:
             }
         else {
             if (debugMode)
-            cout << "Could not load invalid type" << endl;
+                error("Error not a valid type! (Tried to load animaion\n)");
         }
     }
     
@@ -954,7 +961,7 @@ public:
         }
         else {
             if (debugMode)
-            cout << "Error! Not a vaid type: " << type << endl;
+                error("Error not a valid type! (Tried to display texture)\n");
         }
     }
     
@@ -992,10 +999,6 @@ public:
         else if (type == WALK_FRAME5) {
             if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame5IsLoaded) {
                 SDL_DestroyTexture(info.animaion.walk.frame5);
-            }
-            else {
-                if (debugMode)
-                cout << "Error" << endl;
             }
         }
         else if (type == WALK) {
@@ -1035,10 +1038,6 @@ public:
         else if (type == RUN_FRAME5) {
             if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame5IsLoaded) {
                 SDL_DestroyTexture(info.animaion.run.frame5);
-            }
-            else {
-                if (debugMode)
-                cout << "Error" << endl;
             }
         }
         else if (type == RUN) {
@@ -1408,7 +1407,7 @@ public:
         }
         else {
             if (debugMode)
-            cout << "Error! Not a vaid type!";
+            error("Error not a valid type! (Tried to unload texture)\n");
         }
     }
     
@@ -1417,7 +1416,7 @@ public:
         resizeForFrame(currentShownFrame);
         if (currentShownFrame == NONE) {
             if (debugMode)
-            cout << "Error! Could not show next frame!" << endl;
+                error("Error! (Tried to show next frame)\n");
         }
         /* Walk */
         else if (currentShownFrame == WALK_FRAME1) {
@@ -1563,7 +1562,7 @@ public:
         }
         else {
             if (debugMode)
-            cout << "Error" << endl;
+                error("Error! (Tried to show next frame)\n");
         }
     }
     
@@ -1686,8 +1685,7 @@ public:
             SDL_QueryTexture(info.animaion.card.blue.frame6, NULL, NULL, &imgW, &imgH);
         }
         else {
-            if (debugMode)
-            cout << "Error! Not a vaid type!";
+            error("Not a valid type! (Tried to resize frame)\n");
             imgH = 0;
             imgW = 0;
         }
@@ -1702,16 +1700,16 @@ public:
     
     void move(moveType type) {
         if (type == UP) {
-            goTo(info.rect.x, info.rect.y+1);
+            goTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels-1);
         }
         else if (type == DOWN) {
-            goTo(info.rect.x, info.rect.y-1);
+            goTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels+1);
         }
         else if (type == LEFT) {
-            goTo(info.rect.x-1, info.rect.y);
+            goTo(info.rect.x/pixelsPerGamePixels-1, info.rect.y/pixelsPerGamePixels);
         }
         else if (type == RIGHT) {
-            goTo(info.rect.x+1, info.rect.y);
+            goTo(info.rect.x/pixelsPerGamePixels+1, info.rect.y/pixelsPerGamePixels);
         }
     }
 };
@@ -1777,7 +1775,7 @@ int main() {
 #elif defined(_WIN32)
     string operatingSystem = "Windows";
 #else
-    cout << "Operating System not allowed.\nError\n\nPlease Contact: yuel.cheong@gmail.com";
+    error("Operating System not allowed.\nError\n\nPlease Contact: yuel.cheong@gmail.com");
     return -1;
 #endif
     if (debugMode)
@@ -1897,7 +1895,8 @@ int main() {
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
         debugSprite.display(DEBUG_FIELD);
-        debugPlayer.goTo(-3, 0);
+        debugPlayer.move(RIGHT);
+        debugPlayer.move(DOWN);
         debugPlayer.display(NORMAL);
         
         SDL_RenderPresent(renderer);
