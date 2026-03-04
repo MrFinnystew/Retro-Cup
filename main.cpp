@@ -51,8 +51,10 @@ Notes are set up like C++
 #include <random>
 #include <limits>
 #include <cmath>
+#include <unordered_map>
 
 #include "Color Text.hpp"
+#include "Audio/Audio Engine.hpp"
 
 /* Are using these: */
 using
@@ -60,13 +62,15 @@ std::cout,
 std::cin,
 std::string,
 std::endl,
-std::vector;
+std::vector,
+std::ctime;
 
 /*-----------------------------------------------------------------
   --------------------------------Enums----------------------------
   -----------------------------------------------------------------*/
 
 typedef enum {
+    KEY_NONE,
     // Letters:
     KEY_A,
     KEY_B,
@@ -111,7 +115,10 @@ typedef enum {
     KEY_UP,
     KEY_DOWN,
     KEY_LEFT,
-    KEY_RIGHT
+    KEY_RIGHT,
+    
+    // Other
+    KEY_SPACE,
 } Key;
 
 typedef enum {
@@ -321,6 +328,16 @@ typedef struct rectangle {
     int pixels;
 } rectangle;
 
+struct SDLTextureDeleter {
+    void operator()(SDL_Texture* texture) const {
+        SDL_DestroyTexture(texture);
+    }
+};
+
+/* Using Statements: */
+
+using TexturePtr = std::unique_ptr<SDL_Texture, SDLTextureDeleter>;
+
 /*-----------------------------------------------------------------
   -------------------------Global Varriables-----------------------
   -----------------------------------------------------------------*/
@@ -335,9 +352,23 @@ float zoom;
   -----------------------------Functions---------------------------
   -----------------------------------------------------------------*/
 
+string toString(auto input) {
+    return std::to_string(input);
+}
+
 void error(string errorMessage) {
     if (debugMode)
         cout << (startText+startBoldText+redText+endText) << errorMessage << resetText;
+}
+
+void warrning(string warrningMessage) {
+    if (debugMode)
+        cout << (startText+startBoldText+redText+endText) << warrningMessage << resetText;
+}
+
+void printInfo(string info) {
+    if (debugMode)
+        cout << (startText+startBlueText+endText) << info << resetText;
 }
 
 int RandomInt(int low, int high) {
@@ -415,15 +446,13 @@ bool contains(string inputString, string contains) {
 rectangle getScreenSize(int widthPixels) {
     SDL_DisplayMode displayMode;
     if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
-        if (debugMode)
-        cout << "Error, could not get screen size due to error: " << SDL_GetError() << "\n";
+        error("Error, could not get screen size due to error: " + (string)SDL_GetError() + "\n");
     }
     
     rectangle builtInScreen;
     builtInScreen.width = displayMode.w;
     builtInScreen.height = displayMode.h;
-    if (debugMode)
-    cout << "Built in screen: {" << builtInScreen.width << "," << builtInScreen.height << "}" << endl;
+    printInfo("Built in screen: {" + std::to_string(builtInScreen.width) + "," + std::to_string(builtInScreen.height) + "}\n");
     
     /* MATH (Uggghhh...) */
     
@@ -511,6 +540,14 @@ void print(string str) {
     }
 }
 
+SDL_Texture* loadTexture(string path) {
+    SDL_Texture* raw = IMG_LoadTexture(renderer, path.c_str());
+    if (!raw) {
+        error("Failed to load texture: " + (string)IMG_GetError() + "\n");
+    }
+    return raw;
+}
+
 /*-----------------------------------------------------------------
   -----------------------------Classes-----------------------------
   -----------------------------------------------------------------*/
@@ -520,6 +557,10 @@ public:
     humanInfo info;
     animationType currentShownFrame = NONE;
     string spriteName;
+    
+    human(string importedSpriteName) {
+        spriteName = importedSpriteName;
+    }
     
     void init(string importedSpriteName) {
         spriteName = importedSpriteName;
@@ -533,35 +574,38 @@ public:
      */
     
     void loadAnimation(vector<string> filePaths, animationType AnimationType) {
-        if (AnimationType == NORMAL) {
+        if (AnimationType == NONE) {
+            warrning("Warrning AnimaionType was set to NONE (void loadAnimaion)");
+        }
+        else if (AnimationType == NORMAL) {
             string currentFilePath = filePaths[0];
-            info.Texture = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.Texture = loadTexture(currentFilePath);
             info.normalTextureIsLoaded = true;
         }
         else if (AnimationType == RUN) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.run.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.run.frame1 = loadTexture(currentFilePath);
             info.animaion.run.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.run.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.run.frame2 = loadTexture(currentFilePath);
             info.animaion.run.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.run.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.run.frame3 = loadTexture(currentFilePath);
             info.animaion.run.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.run.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.run.frame4 = loadTexture(currentFilePath);
             info.animaion.run.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.run.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.run.frame5 = loadTexture(currentFilePath);
             info.animaion.run.frame5IsLoaded = true;
             
             info.animaion.runIsLoaded = true;
@@ -573,27 +617,27 @@ public:
         else if (AnimationType == WALK) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.walk.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.walk.frame1 = loadTexture(currentFilePath);
             info.animaion.walk.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.walk.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.walk.frame2 = loadTexture(currentFilePath);
             info.animaion.walk.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.walk.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.walk.frame3 = loadTexture(currentFilePath);
             info.animaion.walk.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.walk.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.walk.frame4 = loadTexture(currentFilePath);
             info.animaion.walk.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.walk.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.walk.frame5 = loadTexture(currentFilePath);
             info.animaion.walk.frame5IsLoaded = true;
             
             info.animaion.walkIsLoaded = true;
@@ -605,32 +649,32 @@ public:
         else if (AnimationType == CARD_RED) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.card.red.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame1 = loadTexture(currentFilePath);
             info.animaion.card.red.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.card.red.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame2 = loadTexture(currentFilePath);
             info.animaion.card.red.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.card.red.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame3 = loadTexture(currentFilePath);
             info.animaion.card.red.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.card.red.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame4 = loadTexture(currentFilePath);
             info.animaion.card.red.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.card.red.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame5 = loadTexture(currentFilePath);
             info.animaion.card.red.frame5IsLoaded = true;
             
             // #6
             currentFilePath = filePaths[5];
-            info.animaion.card.red.frame6 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.red.frame6 = loadTexture(currentFilePath);
             info.animaion.card.red.frame6IsLoaded = true;
             
             info.animaion.card.redIsLoaded = true;
@@ -642,35 +686,35 @@ public:
                 }
             }
         }
-        if (AnimationType == CARD_YELLOW) {
+        else if (AnimationType == CARD_YELLOW) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.card.yellow.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame1 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.card.yellow.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame2 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.card.yellow.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame3 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.card.yellow.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame4 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.card.yellow.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame5 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame5IsLoaded = true;
             
             // #6
             currentFilePath = filePaths[5];
-            info.animaion.card.yellow.frame6 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.yellow.frame6 = loadTexture(currentFilePath);
             info.animaion.card.yellow.frame6IsLoaded = true;
             
             info.animaion.card.yellowIsLoaded = true;
@@ -682,35 +726,35 @@ public:
                 }
             }
         }
-        if (AnimationType == CARD_BLUE) {
+        else if (AnimationType == CARD_BLUE) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.card.blue.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame1 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.card.blue.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame2 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.card.blue.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame3 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.card.blue.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame4 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.card.blue.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame5 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame5IsLoaded = true;
             
             // #6
             currentFilePath = filePaths[5];
-            info.animaion.card.blue.frame6 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.blue.frame6 = loadTexture(currentFilePath);
             info.animaion.card.blue.frame6IsLoaded = true;
             
             info.animaion.card.blueIsLoaded = true;
@@ -722,35 +766,35 @@ public:
                 }
             }
         }
-        if (AnimationType == CARD_WHITE) {
+        else if (AnimationType == CARD_WHITE) {
             // #1
             string currentFilePath = filePaths[0];
-            info.animaion.card.white.frame1 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame1 = loadTexture(currentFilePath);
             info.animaion.card.white.frame1IsLoaded = true;
             
             // #2
             currentFilePath = filePaths[1];
-            info.animaion.card.white.frame2 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame2 = loadTexture(currentFilePath);
             info.animaion.card.white.frame2IsLoaded = true;
             
             // #3
             currentFilePath = filePaths[2];
-            info.animaion.card.white.frame3 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame3 = loadTexture(currentFilePath);
             info.animaion.card.white.frame3IsLoaded = true;
 
             // #4
             currentFilePath = filePaths[3];
-            info.animaion.card.white.frame4 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame4 = loadTexture(currentFilePath);
             info.animaion.card.white.frame4IsLoaded = true;
 
             // #5
             currentFilePath = filePaths[4];
-            info.animaion.card.white.frame5 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame5 = loadTexture(currentFilePath);
             info.animaion.card.white.frame5IsLoaded = true;
             
             // #6
             currentFilePath = filePaths[5];
-            info.animaion.card.white.frame6 = IMG_LoadTexture(renderer, currentFilePath.c_str());
+            info.animaion.card.white.frame6 = loadTexture(currentFilePath);
             info.animaion.card.white.frame6IsLoaded = true;
             
             info.animaion.card.whiteIsLoaded = true;
@@ -761,7 +805,7 @@ public:
                     info.allAnimationsAreLoaded = true;
                 }
             }
-            }
+        }
         else {
             if (debugMode)
                 error("Error not a valid type! (Tried to load animaion\n)");
@@ -777,12 +821,15 @@ public:
     void display(animationType type) {
         resizeForFrame(type);
         currentShownFrame = type;
-        if (type == NORMAL) {
+        if (type == NONE){
+            warrning("Warrning type was set to NONE (void display)");
+        }
+        else if (type == NORMAL) {
             SDL_RenderCopy(renderer, info.Texture, NULL, &info.rect);
             currentShownFrame = NORMAL;
         }
         // Walking Frames
-        if (type == WALK_FRAME1) {
+        else if (type == WALK_FRAME1) {
             if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame1IsLoaded) {
                 SDL_RenderCopy(renderer, info.animaion.walk.frame1, NULL, &info.rect);
                 currentShownFrame = WALK_FRAME1;
@@ -972,8 +1019,11 @@ public:
      */
 
     void unload(animationType type) {
+        if (type == NONE) {
+            warrning("Warrning type was set to NONE (void unload)");
+        }
         if (type == NORMAL) {
-            SDL_RenderCopy(renderer, info.Texture, NULL, &info.rect);
+            SDL_DestroyTexture(info.Texture);
         }
         // Walking Frames
         if (type == WALK_FRAME1) {
@@ -1572,7 +1622,12 @@ public:
     
     void resizeForFrame(animationType type) {
         int imgW, imgH;
-        if (type == NORMAL) {
+        if (type == NONE) {
+            warrning("Warrning AnimaionType was set to NONE (void loadAnimaion)");
+            imgH = 0;
+            imgW = 0;
+        }
+        else if (type == NORMAL) {
             SDL_QueryTexture(info.Texture, NULL, NULL, &imgW, &imgH);
         }
         // Walking Frames
@@ -1720,6 +1775,10 @@ public:
     animationType currentFieldType = NONE;
     string spriteName;
     
+    field(string importedSpriteName) {
+        spriteName = importedSpriteName;
+    }
+    
     void init(string importedSpriteName) {
         spriteName = importedSpriteName;
         goTo(0, 0);
@@ -1732,7 +1791,11 @@ public:
     
     void load(string pathToFile, fieldType type) {
         if (type == DEBUG_FIELD) {
+            printInfo("Loading Texture...\n");
             info.textures.debug.normal = IMG_LoadTexture(renderer, pathToFile.c_str());
+            if (!info.textures.debug.normal) {
+                warrning("FIELD LOAD ERROR: " + (string)IMG_GetError() + "\n");
+            }
         }
     }
     
@@ -1768,6 +1831,8 @@ public:
   -----------------------------------------------------------------*/
 
 int main() {
+    using TexturePtr = std::unique_ptr<SDL_Texture, SDLTextureDeleter>;
+    
 #if defined(__APPLE__)
     string operatingSystem = "Apple";
 #elif defined(__linux__)
@@ -1776,18 +1841,25 @@ int main() {
     string operatingSystem = "Windows";
 #else
     error("Operating System not allowed.\nError\n\nPlease Contact: yuel.cheong@gmail.com");
+    operatingSystem = "Not allowed";
     return -1;
 #endif
-    if (debugMode)
-        cout << "Operating System: " << operatingSystem << endl;
+    printInfo(operatingSystem+"\n");
     
+    /*
+     Audio stuff:
+     */
+    Audio audio;
+    audio.load("debugMusic", "/Users/yec/Documents/Retro Cup/Retro Cup/Audio/Sounds/Arrow (Instrumental).mp3");
+    audio.setLoop("debugMusic", true);
+    audio.setVolume("debugMusic", 1.0f);
+    audio.playLoaded("debugMusic");
     
     /*-----------------------------------------------
      -----------------Load Window-------------------
      -----------------------------------------------*/
     
-    if (debugMode)
-        cout << "Initializing..." << endl;
+    printInfo("Initializing...\n");
     
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
@@ -1796,14 +1868,12 @@ int main() {
     /* Width: 444, Height: 690 (Height is automaticly caculated by the function) */
     rectangle screenSize = getScreenSize(444);
     pixelsPerGamePixels = screenSize.pixels;
-    if (debugMode) {
-        cout << endl << "-----------------------------------------------" << endl << endl;
+    cout << endl << "-----------------------------------------------" << endl << endl;
 
-        cout << "Screen Size: " << screenSize.originalWidth << " x " << screenSize.originalHeight << endl;
-        cout << "Window Size: " << screenSize.width << " x " << screenSize.height << endl;
-        cout << "Game Size:   " << screenSize.gameWidth << " x " << screenSize.gameHeight << endl;
-        cout << "Pixels: " << screenSize.pixels << endl;
-    }
+    printInfo("Screen Size: " + toString(screenSize.originalWidth) + " x " + toString(screenSize.originalHeight) + "\n");
+    printInfo("Window Size: " + toString(screenSize.width) + " x " + toString(screenSize.height) + "\n");
+    printInfo("Game Size:   " + toString(screenSize.gameWidth) + " x " + toString(screenSize.gameHeight) + "\n");
+    printInfo("Pixels: " + toString(screenSize.pixels) + "\n");
     
     string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
     
@@ -1811,7 +1881,7 @@ int main() {
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               screenSize.width, screenSize.height, SDL_WINDOW_SHOWN);
     
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_TARGETTEXTURE); /* SDL_RENDERER_ACCELERATED */
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); /* SDL_RENDERER_ACCELERATED */
     
     /*-----------------------------------------------
       -----------------Loaded Window-----------------
@@ -1822,13 +1892,12 @@ int main() {
      Load sprites:
      */
     
-    field debugSprite;
-    debugSprite.init("debugSprite");
+    field debugSprite("debugSprite");
     debugSprite.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField.png", DEBUG_FIELD);
     
-    human debugPlayer;
-    debugPlayer.init("debugPlayer");
+    human debugPlayer("debugPlayer");
     debugPlayer.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
+    debugSprite.goTo(0, 0);
         
     bool WindowShouldClose = false;
     SDL_Event event;
@@ -1836,6 +1905,8 @@ int main() {
     bool IsPrintLoop = false;
     int mouseX = 0;
     int mouseY = 0;
+    
+    Key keyPressed = KEY_NONE;
     
     /*
      |----------------|
@@ -1850,27 +1921,41 @@ int main() {
         /* Only shows every 120 loops */
         if (IsPrintLoop)
             cout <<
-            "---------------------------------------------------------------\n" <<
+            "\n\n---------------------------------------------------------------\n" <<
             "---------------Loop #" << loopNumber << "---------------------\n" <<
             "---------------------------------------------------------------\n";
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) WindowShouldClose = true;
             if (event.type == SDL_KEYDOWN) {
-                if (event.key.type == SDLK_w) {
-                    debugPlayer.move(UP);
-                    print("Key detected! UP\n");
-                }
-                if (event.key.type == SDLK_a) {
-                    debugPlayer.move(LEFT);
-                    print("Key detected! LEFT\n");
-                }
-                if (event.key.type == SDLK_s) {
-                    debugPlayer.move(DOWN);
-                    print("Key detected! DOWN\n");
-                }
-                if (event.key.type == SDLK_d) {
-                    debugPlayer.move(RIGHT);
-                    print("Key detected! RIGHT\n");
+                switch (event.key.keysym.sym) {
+                    case SDLK_w:
+                        keyPressed = KEY_D;
+                        break;
+                    case SDLK_UP:
+                        keyPressed = KEY_UP;
+                        break;
+                    case SDLK_s:
+                        keyPressed = KEY_D;
+                        break;
+                    case SDLK_DOWN:
+                        keyPressed = KEY_DOWN;
+                        break;
+                    case SDLK_a:
+                        keyPressed = KEY_D;
+                        break;
+                    case SDLK_LEFT:
+                        keyPressed = KEY_LEFT;
+                        break;
+                    case SDLK_d:
+                        keyPressed = KEY_D;
+                        break;
+                    case SDLK_RIGHT:
+                        keyPressed = KEY_RIGHT;
+                        break;
+                    case SDLK_SPACE:
+                        printInfo("Spacebar pressed\n");
+                        keyPressed = KEY_SPACE;
+                        break;
                 }
             }
             if (event.type == SDL_MOUSEMOTION) {
@@ -1883,30 +1968,43 @@ int main() {
                     int mouseX = event.button.x;
                     int mouseY = event.button.y;
                     if (debugMode)
-                    cout << "Clicked at: " << mouseX << ", " << mouseY << "\n";
+                        printInfo("Clicked at: " + toString(mouseX) + ", " + toString(mouseY) + "\n");
                 }
             }
         }
         if (isCommonMultiple(loopNumber,120)) {
-            if (debugMode)
-            cout << "Mouse position: " << mouseX << "," << mouseY << "\n";
+            printInfo("Mouse position: " + toString(mouseX) + ", " + toString(mouseY) + "\n");
         }
+        
+        /*
+         ALPHA TESTING STUFF
+         */
+        if (keyPressed == KEY_W || keyPressed == KEY_UP) {
+            debugPlayer.move(UP);
+        }
+        else if (keyPressed == KEY_A || keyPressed == KEY_LEFT) {
+            debugPlayer.move(LEFT);
+        }
+        else if (keyPressed == KEY_S || keyPressed == KEY_DOWN) {
+            debugPlayer.move(DOWN);
+        }
+        else if (keyPressed == KEY_D || keyPressed == KEY_RIGHT) {
+            debugPlayer.move(RIGHT);
+        }
+        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
         debugSprite.display(DEBUG_FIELD);
-        debugPlayer.move(RIGHT);
-        debugPlayer.move(DOWN);
         debugPlayer.display(NORMAL);
         
         SDL_RenderPresent(renderer);
     }
-    if (debugMode)
-    cout << "Exited loop...\n";
-    
+    printInfo("Exited loop\n");
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     debugSprite.unload(DEBUG_FIELD);
+    debugPlayer.unload(NORMAL);
     
     IMG_Quit();
     SDL_Quit();
