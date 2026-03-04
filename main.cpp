@@ -1929,19 +1929,19 @@ int main() {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
-                        keyPressed = KEY_D;
+                        keyPressed = KEY_W;
                         break;
                     case SDLK_UP:
                         keyPressed = KEY_UP;
                         break;
                     case SDLK_s:
-                        keyPressed = KEY_D;
+                        keyPressed = KEY_S;
                         break;
                     case SDLK_DOWN:
                         keyPressed = KEY_DOWN;
                         break;
                     case SDLK_a:
-                        keyPressed = KEY_D;
+                        keyPressed = KEY_A;
                         break;
                     case SDLK_LEFT:
                         keyPressed = KEY_LEFT;
@@ -1999,6 +1999,11 @@ int main() {
         debugPlayer.display(NORMAL);
         
         SDL_RenderPresent(renderer);
+        
+        /*
+         Reset the stuff
+         */
+        keyPressed = KEY_NONE;
     }
     printInfo("Exited loop\n");
     SDL_DestroyRenderer(renderer);
