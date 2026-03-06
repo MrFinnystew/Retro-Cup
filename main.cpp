@@ -2,9 +2,9 @@
  * ----------------------------- Version information: -----------------------------------------
  
                                       Versions:
- vBeta011
- vBeta012
- vBeta013 (Current version)
+ vAlpha 0.1.1
+ vAlpha 0.1.2
+ vAlpha 0.1.3 (Current version)
  
 -----------------------------Last updated: Sat Feb 14 --------------------------------------
 
@@ -2174,7 +2174,7 @@ int main() {
     printInfo("Game Size:   " + toString(screenSize.gameWidth) + " x " + toString(screenSize.gameHeight) + "\n");
     printInfo("Pixels: " + toString(screenSize.pixels) + "\n");
     
-    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
+    string windowName = "Retro Cup | vAlpha 0.1.3 | Last updated: 3/5/2026";
     
     window = SDL_CreateWindow(windowName.c_str(),
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
