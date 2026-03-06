@@ -1231,11 +1231,11 @@ public:
         if (type == NONE) {
             warrning("Warrning type was set to NONE (void unload)");
         }
-        if (type == NORMAL) {
+        else if (type == NORMAL) {
             SDL_DestroyTexture(info.Texture);
         }
         // Walking Frames
-        if (type == WALK_FRAME1) {
+        else if (type == WALK_FRAME1) {
             if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame1IsLoaded) {
                 SDL_DestroyTexture(info.animaion.walk.frame1);
             }
@@ -2203,7 +2203,7 @@ int main() {
     
     camrea.x = 0;
     camrea.y = 0;
-    camrea.zoom = 10;
+    camrea.zoom = 1;
     
     debugPlayer.alphaGoTo(0, 0);
     debugSprite.alphaGoTo(0, 0);
@@ -2308,6 +2308,7 @@ int main() {
         else if (keyPressed == KEY_DOWN) {
             camrea.zoomOut(0.2);
         }
+        //camrea.zoomIn(0.01);
         
         debugPlayer.resizeForFrame(NORMAL);
         debugSprite.resizeForFrame(DEBUG_FIELD);
