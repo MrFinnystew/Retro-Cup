@@ -328,11 +328,6 @@ typedef struct rectangle {
     int pixels;
 } rectangle;
 
-typedef struct Camrea {
-    int zoom;
-    int x, y;
-} Camrea;
-
 /*-----------------------------------------------------------------
   -------------------------Global Varriables-----------------------
   -----------------------------------------------------------------*/
@@ -342,7 +337,6 @@ SDL_Window* window;
 int pixelsPerGamePixels;
 bool debugMode = true;
 int loopNumber = 0;
-Camrea camrea;
 
 /*-----------------------------------------------------------------
   -----------------------------Functions---------------------------
@@ -549,23 +543,44 @@ SDL_Texture* loadTexture(string path) {
     return raw;
 }
 
+class Camrea {
+public:
+    float zoom;
+    int x, y;
+    
+    void zoomIn(float amount) {
+        importantInfo("Increasing zoom by: " + toString(amount) + "\n");
+        zoom += amount;
+        importantInfo("Zoom is now: " + toString(zoom) + "\n");
+    }
+    
+    void zoomOut(float amount) {
+        importantInfo("Decreasing zoom by: " + toString(amount) + "\n");
+        zoom -= amount;
+        importantInfo("Zoom is now: " + toString(zoom) + "\n");
+    }
+};
+
+/*-----------------------------------------------------------------
+  -------------------------Global Varriables #2--------------------
+  -----------------------------------------------------------------*/
+
+Camrea camrea;
+
 /*-----------------------------------------------------------------
   -----------------------------Classes-----------------------------
   -----------------------------------------------------------------*/
-
 class human {
 public:
     humanInfo info;
     animationType currentShownFrame = NONE;
     string spriteName;
+    int worldX = 0;
+    int worldY = 0;
     
     human(string importedSpriteName) {
         spriteName = importedSpriteName;
-    }
-    
-    void init(string importedSpriteName) {
-        spriteName = importedSpriteName;
-        goTo(0, 1);
+        alphaGoTo(0, 0);
     }
     
     /*
@@ -818,6 +833,199 @@ public:
      ----------------------------------Displaying Functions------------------------------------
      ------------------------------------------------------------------------------------------
      */
+    
+    void alphaDisplay(animationType type) {
+        currentShownFrame = type;
+        if (type == NONE){
+            warrning("Warrning type was set to NONE (void alphaDisplay(animationType type))");
+        }
+        else if (type == NORMAL) {
+            SDL_RenderCopy(renderer, info.Texture, NULL, &info.rect);
+            currentShownFrame = NORMAL;
+        }
+        // Walking Frames
+        else if (type == WALK_FRAME1) {
+            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.walk.frame1, NULL, &info.rect);
+                currentShownFrame = WALK_FRAME1;
+            }
+        }
+        else if (type == WALK_FRAME2) {
+            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.walk.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == WALK_FRAME3) {
+            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.walk.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == WALK_FRAME4) {
+            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.walk.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == WALK_FRAME5) {
+            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.walk.frame5, NULL, &info.rect);
+            }
+        }
+        // Runing Frames
+        else if (type == RUN_FRAME1) {
+            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.run.frame1, NULL, &info.rect);
+            }
+        }
+        else if (type == RUN_FRAME2) {
+            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.run.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == RUN_FRAME3) {
+            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.run.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == RUN_FRAME4) {
+            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.run.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == RUN_FRAME5) {
+            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.run.frame5, NULL, &info.rect);
+            }
+        }
+        // Card Frames
+        // Red Card
+        else if (type == CARD_RED_FRAME1) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame1, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_RED_FRAME2) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_RED_FRAME3) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_RED_FRAME4) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_RED_FRAME5) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame5, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_RED_FRAME6) {
+            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame6IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.red.frame6, NULL, &info.rect);
+            }
+        }
+            // Yellow Card
+        else if (type == CARD_YELLOW_FRAME1) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame1, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_YELLOW_FRAME2) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_YELLOW_FRAME3) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_YELLOW_FRAME4) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_YELLOW_FRAME5) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame5, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_YELLOW_FRAME6) {
+            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame6IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.yellow.frame6, NULL, &info.rect);
+            }
+        }
+            // White Card
+        else if (type == CARD_WHITE_FRAME1) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame1, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_WHITE_FRAME2) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_WHITE_FRAME3) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_WHITE_FRAME4) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_WHITE_FRAME5) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame5, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_WHITE_FRAME6) {
+            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame6IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.white.frame6, NULL, &info.rect);
+            }
+        }
+            // Blue Card
+        else if (type == CARD_BLUE_FRAME1) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame1IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame1, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_BLUE_FRAME2) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame2IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame2, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_BLUE_FRAME3) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame3IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame3, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_BLUE_FRAME4) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame4IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame4, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_BLUE_FRAME5) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame5IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame5, NULL, &info.rect);
+            }
+        }
+        else if (type == CARD_BLUE_FRAME6) {
+            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame6IsLoaded) {
+                SDL_RenderCopy(renderer, info.animaion.card.blue.frame6, NULL, &info.rect);
+            }
+        }
+        else {
+            if (debugMode)
+                error("Error not a valid type! (Tried to display texture)\n");
+        }
+    }
     
     void display(animationType type) {
         resizeForFrame(type);
@@ -1751,64 +1959,74 @@ public:
     
     void goTo(int x, int y) {
         importantInfo("Function activated! goTo(moveType type)\n");
+        worldX = x;
+        worldY = y;
         info.rect.x = x * pixelsPerGamePixels;
         info.rect.y = y * pixelsPerGamePixels;
     }
     
     void alphaGoTo(int x, int y) {
-        importantInfo("Function activated! betaGoTo(int x, int y)\n");
-        info.rect.x = (x * pixelsPerGamePixels) - camrea.x;
-        info.rect.y = (y * pixelsPerGamePixels) - camrea.y;
+        importantInfo("Function activated! alphaGoTo(int x, int y)\n");
+        worldX = x;
+        worldY = y;
+        info.rect.x = round((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = round((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
     }
     
     void move(moveType type) {
         importantInfo("Function activated! move(moveType type)\n");
         if (type == UP) {
-            goTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels-1);
+            goTo(worldX, worldY - 1);
         }
         else if (type == DOWN) {
-            goTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels+1);
+            goTo(worldX, worldY + 1);
         }
         else if (type == LEFT) {
-            goTo(info.rect.x/pixelsPerGamePixels-1, info.rect.y/pixelsPerGamePixels);
+            goTo(worldX - 1, worldY);
         }
         else if (type == RIGHT) {
-            goTo(info.rect.x/pixelsPerGamePixels+1, info.rect.y/pixelsPerGamePixels);
+            goTo(worldX + 1, worldY);
         }
     }
     
     void alphaMove(moveType type) {
-        importantInfo("Function activated! betaMove(moveType type)\n");
+        importantInfo("Function activated! alphaMove(moveType type)\n");
         if (type == UP) {
-            importantInfo("UP Dectected!\n");
-            alphaGoTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels-1);
+            importantInfo("UP Detected!\n");
+            alphaGoTo(worldX, worldY - 1);
         }
         else if (type == DOWN) {
-            importantInfo("DOWN Dectected!\n");
-            alphaGoTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels+1);
+            importantInfo("DOWN Detected!\n");
+            alphaGoTo(worldX, worldY + 1);
         }
         else if (type == LEFT) {
-            importantInfo("LEFT Dectected!\n");
-            alphaGoTo(info.rect.x/pixelsPerGamePixels-1, info.rect.y/pixelsPerGamePixels);
+            importantInfo("LEFT Detected!\n");
+            alphaGoTo(worldX - 1, worldY);
         }
         else if (type == RIGHT) {
-            importantInfo("RIGHT Dectected!\n");
-            alphaGoTo(info.rect.x/pixelsPerGamePixels+1, info.rect.y/pixelsPerGamePixels);
+            importantInfo("RIGHT Detected!\n");
+            alphaGoTo(worldX + 1, worldY);
         }
     }
     
     void updateWidthHeight() {
-        //importantInfo("Function activated! updateWidthHeight()\n");
+        // Rebuild rect from world position so zoom changes don't drift position.
+        animationType typeToResize = currentShownFrame == NONE ? NORMAL : currentShownFrame;
+        resizeForFrame(typeToResize);
         info.rect.h = camrea.zoom * info.rect.h;
         info.rect.w = camrea.zoom * info.rect.w;
+        info.rect.x = round((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = round((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
     }
 };
 
 class field {
 public:
     fieldSprite info;
-    animationType currentFieldType = NONE;
+    fieldType currentFieldType = FIELD_NONE;
     string spriteName;
+    int worldX = 0;
+    int worldY = 0;
     
     field(string importedSpriteName) {
         spriteName = importedSpriteName;
@@ -1820,6 +2038,8 @@ public:
     }
     
     void goTo(int x, int y) {
+        worldX = x;
+        worldY = y;
         info.rect.x = x * pixelsPerGamePixels;
         info.rect.y = y * pixelsPerGamePixels;
     }
@@ -1840,7 +2060,15 @@ public:
         }
     }
     
+    void alphaDisplay(fieldType type) {
+        currentFieldType = type;
+        if (type == DEBUG_FIELD) {
+            SDL_RenderCopy(renderer, info.textures.debug.normal, NULL, &info.rect);
+        }
+    }
+    
     void display(fieldType type) {
+        currentFieldType = type;
         resizeForFrame(type);
         if (type == DEBUG_FIELD) {
             SDL_RenderCopy(renderer, info.textures.debug.normal, NULL, &info.rect);
@@ -1853,6 +2081,7 @@ public:
             SDL_QueryTexture(info.textures.debug.normal, NULL, NULL, &imgW, &imgH);
         }
         else {
+            error("Error Not a vaid type! resizeForFrame(fieldType type)\n");
             imgH = 0;
             imgW = 0;
         }
@@ -1860,34 +2089,41 @@ public:
         info.rect.w = imgW * pixelsPerGamePixels;
     }
     
-    void betaMove(moveType type) {
-        importantInfo("Moving...\n");
+    void alphaMove(moveType type) {
+        importantInfo("Function activated! alphaMove(moveType type)\n");
         if (type == UP) {
-            importantInfo("UP Dectected!\n");
-            betaGoTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels-1);
+            importantInfo("UP Detected!\n");
+            alphaGoTo(worldX, worldY - 1);
         }
         else if (type == DOWN) {
-            importantInfo("DOWN Dectected!\n");
-            betaGoTo(info.rect.x/pixelsPerGamePixels, info.rect.y/pixelsPerGamePixels+1);
+            importantInfo("DOWN Detected!\n");
+            alphaGoTo(worldX, worldY + 1);
         }
         else if (type == LEFT) {
-            importantInfo("LEFT Dectected!\n");
-            betaGoTo(info.rect.x/pixelsPerGamePixels-1, info.rect.y/pixelsPerGamePixels);
+            importantInfo("LEFT Detected!\n");
+            alphaGoTo(worldX - 1, worldY);
         }
         else if (type == RIGHT) {
-            importantInfo("RIGHT Dectected!\n");
-            betaGoTo(info.rect.x/pixelsPerGamePixels+1, info.rect.y/pixelsPerGamePixels);
+            importantInfo("RIGHT Detected!\n");
+            alphaGoTo(worldX + 1, worldY);
         }
     }
     
-    void betaGoTo(int x, int y) {
-        info.rect.x = ((x * pixelsPerGamePixels) - camrea.x);
-        info.rect.y = ((y * pixelsPerGamePixels) - camrea.y);
+    void alphaGoTo(int x, int y) {
+        importantInfo("Function activated! alphaGoTo(int x, int y)\n");
+        worldX = x;
+        worldY = y;
+        info.rect.x = ((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = ((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
     }
     
     void updateWidthHeight() {
-        info.rect.h *= camrea.zoom;
-        info.rect.w *= camrea.zoom;
+        fieldType typeToResize = currentFieldType == FIELD_NONE ? DEBUG_FIELD : currentFieldType;
+        resizeForFrame(typeToResize);
+        info.rect.h = camrea.zoom * info.rect.h;
+        info.rect.w = camrea.zoom * info.rect.w;
+        info.rect.x = ((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = ((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
     }
 };
 
@@ -1967,10 +2203,10 @@ int main() {
     
     camrea.x = 0;
     camrea.y = 0;
-    camrea.zoom = 100;
+    camrea.zoom = 10;
     
     debugPlayer.alphaGoTo(0, 0);
-    debugSprite.betaGoTo(0, 0);
+    debugSprite.alphaGoTo(0, 0);
         
     bool WindowShouldClose = false;
     SDL_Event event;
@@ -2047,11 +2283,10 @@ int main() {
         if (isCommonMultiple(loopNumber,120)) {
             printInfo("Mouse position: " + toString(mouseX) + ", " + toString(mouseY) + "\n");
         }
-        
         /*
          ALPHA TESTING STUFF
          */
-        if (keyPressed == KEY_W || keyPressed == KEY_UP) {
+        if (keyPressed == KEY_W) {
             //camrea.y += pixelsPerGamePixels;
             debugPlayer.alphaMove(UP);
         }
@@ -2059,7 +2294,7 @@ int main() {
             //camrea.x += pixelsPerGamePixels;
             debugPlayer.alphaMove(LEFT);
         }
-        else if (keyPressed == KEY_S || keyPressed == KEY_DOWN) {
+        else if (keyPressed == KEY_S) {
             //camrea.y -= pixelsPerGamePixels;
             debugPlayer.alphaMove(DOWN);
         }
@@ -2067,14 +2302,25 @@ int main() {
             //camrea.x -= pixelsPerGamePixels;
             debugPlayer.alphaMove(RIGHT);
         }
+        else if (keyPressed == KEY_UP) {
+            camrea.zoomIn(0.2);
+        }
+        else if (keyPressed == KEY_DOWN) {
+            camrea.zoomOut(0.2);
+        }
+        
+        debugPlayer.resizeForFrame(NORMAL);
+        debugSprite.resizeForFrame(DEBUG_FIELD);
+        
+        
         debugSprite.updateWidthHeight();
         debugPlayer.updateWidthHeight();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
-        debugSprite.display(DEBUG_FIELD);
-        debugPlayer.display(NORMAL);
+        debugSprite.alphaDisplay(DEBUG_FIELD);
+        debugPlayer.alphaDisplay(NORMAL);
         
         SDL_RenderPresent(renderer);
         
