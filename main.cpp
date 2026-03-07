@@ -337,6 +337,7 @@ SDL_Window* window;
 int pixelsPerGamePixels;
 bool debugMode = true;
 int loopNumber = 0;
+double currentFPS;
 
 /*-----------------------------------------------------------------
   -----------------------------Functions---------------------------
@@ -541,6 +542,23 @@ SDL_Texture* loadTexture(string path) {
         error("Failed to load texture: " + (string)IMG_GetError() + "\n");
     }
     return raw;
+}
+
+void updateFPS() {
+    static auto previousTime = std::chrono::high_resolution_clock::now();
+    static int frameCount = 0;
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    frameCount++;
+
+    std::chrono::duration<double> elapsed = currentTime - previousTime;
+
+    // Update the global variable only once per second
+    if (elapsed.count() >= 1.0) {
+        currentFPS = frameCount;
+        frameCount = 0;
+        previousTime = currentTime;
+    }
 }
 
 class Camrea {
@@ -2224,14 +2242,18 @@ int main() {
     
     while (!WindowShouldClose) {
         loopNumber ++;
+        updateFPS();
+        
         if (debugMode)
         IsPrintLoop = isCommonMultiple(loopNumber,120);
         /* Only shows every 120 loops */
-        if (IsPrintLoop)
+        if (IsPrintLoop) {
             cout <<
             "\n\n---------------------------------------------------------------\n" <<
             "---------------Loop #" << loopNumber << "---------------------\n" <<
             "---------------------------------------------------------------\n";
+            printInfo(toString(currentFPS));
+        }
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) WindowShouldClose = true;
             if (event.type == SDL_KEYDOWN) {
