@@ -201,6 +201,13 @@ typedef enum {
 } fieldType;
 
 typedef enum {
+    NONE_BALL,
+    
+    NORMAL_BALL,
+    DEBUG_BALL,
+} ballType;
+
+typedef enum {
     UP,
     DOWN,
     LEFT,
@@ -294,6 +301,12 @@ typedef struct humanSprite {
     Animation animaion;
 } humanInfo;
 
+typedef struct ballSprite {
+    SDL_Texture* texture;
+    bool textureIsLoaded;
+    SDL_Rect rect;
+} ballSprite;
+
 typedef struct individualFieldTexture {
     SDL_Texture* normal;
     bool normalIsLoaded;
@@ -338,6 +351,7 @@ int pixelsPerGamePixels;
 bool debugMode = true;
 int loopNumber = 0;
 double currentFPS;
+vector<double> largestFPSlist = {};
 
 /*-----------------------------------------------------------------
   -----------------------------Functions---------------------------
@@ -367,23 +381,15 @@ void importantInfo(string info) {
         cout << (startText+startBoldText+greenText+endText) << info << resetText;
 }
 
+void printEndInfo(string info, auto value) {
+    if (debugMode)
+        cout << info << (startText+startBoldText+redText+endText) << value << (resetText) << endl;
+}
+
 int RandomInt(int low, int high) {
-    /* 1. Obtain a random seed from the hardware or OS
-          (intended to be non-deterministic when possible) */
-    std::random_device rd;
-    
-    /* 2. Initialize a high-quality pseudo-random number engine with the seed
-          The Mersenne Twister engine (mt19937) is a common choice */
-    std::mt19937 gen(rd());
-    
-    /* 3. Define the desired range (e.g., between 1 and 100 inclusive)
-          uniform_int_distribution ensures uniform distribution across the range */
-    std::uniform_int_distribution<> distrib(low, high);
-    
-    /* 4. Generate and return the random number */
-    int randomNumber = distrib(gen);
-    
-    return randomNumber;
+    static thread_local std::mt19937 gen(std::random_device{}());
+    std::uniform_int_distribution<int> distrib(low, high);
+    return distrib(gen);
 }
 
 void pauseMicroseconds(int microseconds) {
@@ -555,16 +561,17 @@ void updateFPS() {
 
     // Update the global variable only once per second
     if (elapsed.count() >= 1.0) {
-        currentFPS = frameCount;
+        currentFPS = frameCount / elapsed.count();
         frameCount = 0;
         previousTime = currentTime;
+        largestFPSlist.push_back(currentFPS);
     }
 }
 
 class Camrea {
 public:
-    float zoom;
-    int x, y;
+    double zoom;
+    double x, y;
     
     void zoomIn(float amount) {
         importantInfo("Increasing zoom by: " + toString(amount) + "\n");
@@ -2145,6 +2152,109 @@ public:
     }
 };
 
+class ball {
+public:
+    ballType currentShownFrame = NONE_BALL;
+    string spriteName;
+    int worldX = 0;
+    int worldY = 0;
+    ballSprite info;
+    
+    ball(string importedSpriteName) {
+        spriteName = importedSpriteName;
+        goTo(0, 0);
+    }
+    
+    void goTo(int x, int y) {
+        worldX = x;
+        worldY = y;
+        info.rect.x = x * pixelsPerGamePixels;
+        info.rect.y = y * pixelsPerGamePixels;
+    }
+    
+    void load(string pathToFile, ballType type) {
+        if (type == DEBUG_BALL) {
+            printInfo("Loading Texture...\n");
+            info.texture = IMG_LoadTexture(renderer, pathToFile.c_str());
+            if (!info.texture) {
+                warrning("FIELD LOAD ERROR: " + (string)IMG_GetError() + "\n");
+            }
+        }
+    }
+    
+    void unload(ballType type) {
+        if (type == DEBUG_BALL) {
+            SDL_DestroyTexture(info.texture);
+        }
+    }
+    
+    void alphaDisplay(ballType type) {
+        currentShownFrame = type;
+        if (type == DEBUG_BALL) {
+            SDL_RenderCopy(renderer, info.texture, NULL, &info.rect);
+        }
+    }
+    
+    void display(ballType type) {
+        currentShownFrame = type;
+        resizeForFrame(type);
+        if (type == DEBUG_BALL) {
+            SDL_RenderCopy(renderer, info.texture, NULL, &info.rect);
+        }
+    }
+    
+    void resizeForFrame(ballType type) {
+        int imgW, imgH;
+        if (type == DEBUG_BALL) {
+            SDL_QueryTexture(info.texture, NULL, NULL, &imgW, &imgH);
+        }
+        else {
+            error("Error Not a vaid type! resizeForFrame(fieldType type)\n");
+            imgH = 0;
+            imgW = 0;
+        }
+        info.rect.h = imgH * pixelsPerGamePixels;
+        info.rect.w = imgW * pixelsPerGamePixels;
+    }
+    
+    void alphaMove(moveType type) {
+        importantInfo("Function activated! alphaMove(moveType type)\n");
+        if (type == UP) {
+            importantInfo("UP Detected!\n");
+            alphaGoTo(worldX, worldY - 1);
+        }
+        else if (type == DOWN) {
+            importantInfo("DOWN Detected!\n");
+            alphaGoTo(worldX, worldY + 1);
+        }
+        else if (type == LEFT) {
+            importantInfo("LEFT Detected!\n");
+            alphaGoTo(worldX - 1, worldY);
+        }
+        else if (type == RIGHT) {
+            importantInfo("RIGHT Detected!\n");
+            alphaGoTo(worldX + 1, worldY);
+        }
+    }
+    
+    void alphaGoTo(int x, int y) {
+        importantInfo("Function activated! alphaGoTo(int x, int y)\n");
+        worldX = x;
+        worldY = y;
+        info.rect.x = ((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = ((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
+    }
+    
+    void updateWidthHeight() {
+        ballType typeToResize = currentShownFrame == NONE_BALL ? DEBUG_BALL : currentShownFrame;
+        resizeForFrame(typeToResize);
+        info.rect.h = camrea.zoom * info.rect.h;
+        info.rect.w = camrea.zoom * info.rect.w;
+        info.rect.x = ((worldX * pixelsPerGamePixels * camrea.zoom) - camrea.x);
+        info.rect.y = ((worldY * pixelsPerGamePixels * camrea.zoom) - camrea.y);
+    }
+};
+
 /*-----------------------------------------------------------------
   -----------------------------int Main----------------------------
   -----------------------------------------------------------------*/
@@ -2209,12 +2319,15 @@ int main() {
      Load sprites:
      */
     
-    field debugSprite("debugSprite");
-    debugSprite.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField.png", DEBUG_FIELD);
+    ball debugBall("debugBall");
+    debugBall.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/ball/debugBall.png", DEBUG_BALL);
+    
+    field debugField("debugSprite");
+    debugField.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField.png", DEBUG_FIELD);
     
     human debugPlayer("debugPlayer");
     debugPlayer.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
-    debugSprite.goTo(0, 0);
+    debugField.goTo(0, 0);
     
     human debugPlayerAI("debugPlayerAI");
     debugPlayerAI.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
@@ -2224,7 +2337,7 @@ int main() {
     camrea.zoom = 1;
     
     debugPlayer.alphaGoTo(0, 0);
-    debugSprite.alphaGoTo(0, 0);
+    debugField.alphaGoTo(0, 0);
         
     bool WindowShouldClose = false;
     SDL_Event event;
@@ -2252,7 +2365,7 @@ int main() {
             "\n\n---------------------------------------------------------------\n" <<
             "---------------Loop #" << loopNumber << "---------------------\n" <<
             "---------------------------------------------------------------\n";
-            printInfo(toString(currentFPS));
+            printInfo(toString(currentFPS) + "\n");
         }
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) WindowShouldClose = true;
@@ -2333,17 +2446,20 @@ int main() {
         //camrea.zoomIn(0.01);
         
         debugPlayer.resizeForFrame(NORMAL);
-        debugSprite.resizeForFrame(DEBUG_FIELD);
+        debugField.resizeForFrame(DEBUG_FIELD);
+        debugBall.resizeForFrame(DEBUG_BALL);
         
         
-        debugSprite.updateWidthHeight();
+        debugField.updateWidthHeight();
         debugPlayer.updateWidthHeight();
+        debugBall.updateWidthHeight();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
-        debugSprite.alphaDisplay(DEBUG_FIELD);
+        debugField.alphaDisplay(DEBUG_FIELD);
         debugPlayer.alphaDisplay(NORMAL);
+        debugBall.alphaDisplay(DEBUG_BALL);
         
         SDL_RenderPresent(renderer);
         
@@ -2352,16 +2468,48 @@ int main() {
          */
         keyPressed = KEY_NONE;
     }
-    printInfo("Exited loop\n");
+    printInfo("\nExited loop\n");
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     importantInfo("debugSprite Unloading...\n");
-    debugSprite.unload(DEBUG_FIELD);
+    debugField.unload(DEBUG_FIELD);
     importantInfo("debugPlayer Unloading...\n");
     debugPlayer.unload(NORMAL);
+    importantInfo("debugBall Unloading...\n");
+    debugBall.unload(DEBUG_BALL);
+    
+    double largestFPS = largestFPSlist[0];
+    for (double num : largestFPSlist) {
+        if (num > largestFPS) {
+            largestFPS = num;
+        }
+    }
+    
+    double lowestFPS = largestFPSlist[0];
+    for (double num : largestFPSlist) {
+        if (num < lowestFPS) {
+            lowestFPS = num;
+        }
+    }
+    
+    print( (string)"\n\n\n--------------------------------------------------" + "\n" +
+                   "-----------------Ending information---------------" + "\n" +
+                   "--------------------------------------------------" + "\n");
+    printEndInfo("Highest FPS:         ", largestFPS);
+    printEndInfo("Lowest FPS:          ", lowestFPS);
+    printEndInfo("Ending Camrea state: ", ("{" + std::to_string(camrea.zoom) + "," + std::to_string(camrea.x) + "," + std::to_string(camrea.y) + "}"));
+        // -------------------------
+        // -------------------------
+        // --------------------------------------------------
+    print("\n                  Sprite States:                  \n");
+    printEndInfo("debugPlayer State:   ", ("{" + std::to_string(debugPlayer.info.rect.x) + "," + std::to_string(debugPlayer.info.rect.y) + "," + std::to_string(debugPlayer.info.rect.h) + "," + std::to_string(debugPlayer.info.rect.w) + "}"));
+    printEndInfo("debugField State:    ", ("{" + std::to_string(debugField.info.rect.x) + "," + std::to_string(debugField.info.rect.y) + "," + std::to_string(debugField.info.rect.h) + "," + std::to_string(debugField.info.rect.w) + "}"));
+    printEndInfo("debugBall State:     ", ("{" + std::to_string(debugBall.info.rect.x) + "," + std::to_string(debugBall.info.rect.y) + "," + std::to_string(debugBall.info.rect.h) + "," + std::to_string(debugBall.info.rect.w) + "}"));
+    
+    warrning("\nENDING PROGRAM...\n\n\n\n");
     
     IMG_Quit();
     SDL_Quit();
-    
+     
     return 0;
 }
