@@ -1850,6 +1850,10 @@ public:
         info.texture = nullptr;
     }
     
+    void initTexture() {
+        info.texture = nullptr;
+    }
+    
     void goTo(int x, int y) {
         worldX = x;
         worldY = y;
