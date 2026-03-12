@@ -605,7 +605,46 @@ public:
     
     human(string importedSpriteName) {
         spriteName = importedSpriteName;
+        initTextures();
         alphaGoTo(0, 0);
+    }
+    
+    void initTextures() {
+        info.Texture = nullptr;
+        info.animaion.walk.frame1 = nullptr;
+        info.animaion.walk.frame2 = nullptr;
+        info.animaion.walk.frame3 = nullptr;
+        info.animaion.walk.frame4 = nullptr;
+        info.animaion.walk.frame5 = nullptr;
+        info.animaion.run.frame1 = nullptr;
+        info.animaion.run.frame2 = nullptr;
+        info.animaion.run.frame3 = nullptr;
+        info.animaion.run.frame4 = nullptr;
+        info.animaion.run.frame5 = nullptr;
+        info.animaion.card.red.frame1 = nullptr;
+        info.animaion.card.red.frame2 = nullptr;
+        info.animaion.card.red.frame3 = nullptr;
+        info.animaion.card.red.frame4 = nullptr;
+        info.animaion.card.red.frame5 = nullptr;
+        info.animaion.card.red.frame6 = nullptr;
+        info.animaion.card.yellow.frame1 = nullptr;
+        info.animaion.card.yellow.frame2 = nullptr;
+        info.animaion.card.yellow.frame3 = nullptr;
+        info.animaion.card.yellow.frame4 = nullptr;
+        info.animaion.card.yellow.frame5 = nullptr;
+        info.animaion.card.yellow.frame6 = nullptr;
+        info.animaion.card.white.frame1 = nullptr;
+        info.animaion.card.white.frame2 = nullptr;
+        info.animaion.card.white.frame3 = nullptr;
+        info.animaion.card.white.frame4 = nullptr;
+        info.animaion.card.white.frame5 = nullptr;
+        info.animaion.card.white.frame6 = nullptr;
+        info.animaion.card.blue.frame1 = nullptr;
+        info.animaion.card.blue.frame2 = nullptr;
+        info.animaion.card.blue.frame3 = nullptr;
+        info.animaion.card.blue.frame4 = nullptr;
+        info.animaion.card.blue.frame5 = nullptr;
+        info.animaion.card.blue.frame6 = nullptr;
     }
     
     /*
@@ -1251,450 +1290,44 @@ public:
      ----------------------------------Unloading Functions-------------------------------------
      ------------------------------------------------------------------------------------------
      */
-
-    void unload(animationType type) {
-        if (type == NONE) {
-            warrning("Warrning type was set to NONE (void unload)");
-        }
-        else if (type == NORMAL) {
-            SDL_DestroyTexture(info.Texture);
-        }
-        // Walking Frames
-        else if (type == WALK_FRAME1) {
-            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.walk.frame1);
-            }
-        }
-        else if (type == WALK_FRAME2) {
-            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.walk.frame2);
-            }
-        }
-        else if (type == WALK_FRAME3) {
-            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.walk.frame3);
-            }
-        }
-        else if (type == WALK_FRAME4) {
-            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.walk.frame4);
-            }
-        }
-        else if (type == WALK_FRAME5) {
-            if (info.animaion.walkIsLoaded || info.allAnimationsAreLoaded || info.animaion.walk.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.walk.frame5);
-            }
-        }
-        else if (type == WALK) {
-            if (info.animaion.walkIsLoaded || (info.animaion.walk.frame1IsLoaded &&
-                                               info.animaion.walk.frame2IsLoaded &&
-                                               info.animaion.walk.frame3IsLoaded &&
-                                               info.animaion.walk.frame4IsLoaded &&
-                                               info.animaion.walk.frame5IsLoaded )){
-                SDL_DestroyTexture(info.animaion.walk.frame1);
-                SDL_DestroyTexture(info.animaion.walk.frame2);
-                SDL_DestroyTexture(info.animaion.walk.frame3);
-                SDL_DestroyTexture(info.animaion.walk.frame4);
-                SDL_DestroyTexture(info.animaion.walk.frame5);
-            }
-        }
-        // Runing Frames
-        else if (type == RUN_FRAME1) {
-            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.run.frame1);
-            }
-        }
-        else if (type == RUN_FRAME2) {
-            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.run.frame2);
-            }
-        }
-        else if (type == RUN_FRAME3) {
-            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.run.frame3);
-            }
-        }
-        else if (type == RUN_FRAME4) {
-            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.run.frame4);
-            }
-        }
-        else if (type == RUN_FRAME5) {
-            if (info.animaion.runIsLoaded || info.allAnimationsAreLoaded || info.animaion.run.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.run.frame5);
-            }
-        }
-        else if (type == RUN) {
-            if (info.animaion.runIsLoaded || (info.animaion.run.frame1IsLoaded &&
-                                              info.animaion.run.frame2IsLoaded &&
-                                              info.animaion.run.frame3IsLoaded &&
-                                              info.animaion.run.frame4IsLoaded &&
-                                              info.animaion.run.frame5IsLoaded )){
-                SDL_DestroyTexture(info.animaion.run.frame1);
-                SDL_DestroyTexture(info.animaion.run.frame2);
-                SDL_DestroyTexture(info.animaion.run.frame3);
-                SDL_DestroyTexture(info.animaion.run.frame4);
-                SDL_DestroyTexture(info.animaion.run.frame5);
-            }
-        }
-        // Card Frames
-        // Red Card
-        else if (type == CARD_RED_FRAME1) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame1);
-            }
-        }
-        else if (type == CARD_RED_FRAME2) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame2);
-            }
-        }
-        else if (type == CARD_RED_FRAME3) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame3);
-            }
-        }
-        else if (type == CARD_RED_FRAME4) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame4);
-            }
-        }
-        else if (type == CARD_RED_FRAME5) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame5);
-            }
-        }
-        else if (type == CARD_RED_FRAME6) {
-            if (info.animaion.card.redIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.red.frame6IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.red.frame6);
-            }
-        }
-        else if (type == CARD_RED) {
-            if (info.animaion.card.redIsLoaded || (info.animaion.card.red.frame1IsLoaded &&
-                                                   info.animaion.card.red.frame2IsLoaded &&
-                                                   info.animaion.card.red.frame3IsLoaded &&
-                                                   info.animaion.card.red.frame4IsLoaded &&
-                                                   info.animaion.card.red.frame5IsLoaded &&
-                                                   info.animaion.card.red.frame6IsLoaded )){
-                SDL_DestroyTexture(info.animaion.card.red.frame1);
-                SDL_DestroyTexture(info.animaion.card.red.frame2);
-                SDL_DestroyTexture(info.animaion.card.red.frame3);
-                SDL_DestroyTexture(info.animaion.card.red.frame4);
-                SDL_DestroyTexture(info.animaion.card.red.frame5);
-                SDL_DestroyTexture(info.animaion.card.red.frame6);
-            }
-        }
-        // Yellow Card
-        else if (type == CARD_YELLOW_FRAME1) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame1);
-            }
-        }
-        else if (type == CARD_YELLOW_FRAME2) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame2);
-            }
-        }
-        else if (type == CARD_YELLOW_FRAME3) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame3);
-            }
-        }
-        else if (type == CARD_YELLOW_FRAME4) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame4);
-            }
-        }
-        else if (type == CARD_YELLOW_FRAME5) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame5);
-            }
-        }
-        else if (type == CARD_YELLOW_FRAME6) {
-            if (info.animaion.card.yellowIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.yellow.frame6IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.yellow.frame6);
-            }
-        }
-        else if (type == CARD_YELLOW) {
-            if (info.animaion.card.yellowIsLoaded || (info.animaion.card.yellow.frame1IsLoaded &&
-                                                      info.animaion.card.yellow.frame2IsLoaded &&
-                                                      info.animaion.card.yellow.frame3IsLoaded &&
-                                                      info.animaion.card.yellow.frame4IsLoaded &&
-                                                      info.animaion.card.yellow.frame5IsLoaded &&
-                                                      info.animaion.card.yellow.frame6IsLoaded )){
-                SDL_DestroyTexture(info.animaion.card.yellow.frame1);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame2);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame3);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame4);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame5);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame6);
-            }
-        }
-        // White Card
-        else if (type == CARD_WHITE_FRAME1) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame1);
-            }
-        }
-        else if (type == CARD_WHITE_FRAME2) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame2);
-            }
-        }
-        else if (type == CARD_WHITE_FRAME3) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame3);
-            }
-        }
-        else if (type == CARD_WHITE_FRAME4) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame4);
-            }
-        }
-        else if (type == CARD_WHITE_FRAME5) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame5);
-            }
-        }
-        else if (type == CARD_WHITE_FRAME6) {
-            if (info.animaion.card.whiteIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.white.frame6IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.white.frame6);
-            }
-        }
-        else if (type == CARD_WHITE) {
-            if (info.animaion.card.whiteIsLoaded || (info.animaion.card.white.frame1IsLoaded &&
-                                                     info.animaion.card.white.frame2IsLoaded &&
-                                                     info.animaion.card.white.frame3IsLoaded &&
-                                                     info.animaion.card.white.frame4IsLoaded &&
-                                                     info.animaion.card.white.frame5IsLoaded &&
-                                                     info.animaion.card.white.frame6IsLoaded )){
-                SDL_DestroyTexture(info.animaion.card.white.frame1);
-                SDL_DestroyTexture(info.animaion.card.white.frame2);
-                SDL_DestroyTexture(info.animaion.card.white.frame3);
-                SDL_DestroyTexture(info.animaion.card.white.frame4);
-                SDL_DestroyTexture(info.animaion.card.white.frame5);
-                SDL_DestroyTexture(info.animaion.card.white.frame6);
-            }
-        }
-        // Blue Card
-        else if (type == CARD_BLUE_FRAME1) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame1IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame1);
-            }
-        }
-        else if (type == CARD_BLUE_FRAME2) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame2IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame2);
-            }
-        }
-        else if (type == CARD_BLUE_FRAME3) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame3IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame3);
-            }
-        }
-        else if (type == CARD_BLUE_FRAME4) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame4IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame4);
-            }
-        }
-        else if (type == CARD_BLUE_FRAME5) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame5IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame5);
-            }
-        }
-        else if (type == CARD_BLUE_FRAME6) {
-            if (info.animaion.card.blueIsLoaded || info.allAnimationsAreLoaded || info.animaion.card.blue.frame6IsLoaded) {
-                SDL_DestroyTexture(info.animaion.card.blue.frame6);
-            }
-        }
-        else if (type == CARD_BLUE) {
-            if (info.animaion.card.blueIsLoaded || (info.animaion.card.blue.frame1IsLoaded &&
-                                                    info.animaion.card.blue.frame2IsLoaded &&
-                                                    info.animaion.card.blue.frame3IsLoaded &&
-                                                    info.animaion.card.blue.frame4IsLoaded &&
-                                                    info.animaion.card.blue.frame5IsLoaded &&
-                                                    info.animaion.card.blue.frame6IsLoaded )){
-                SDL_DestroyTexture(info.animaion.card.blue.frame1);
-                SDL_DestroyTexture(info.animaion.card.blue.frame2);
-                SDL_DestroyTexture(info.animaion.card.blue.frame3);
-                SDL_DestroyTexture(info.animaion.card.blue.frame4);
-                SDL_DestroyTexture(info.animaion.card.blue.frame5);
-                SDL_DestroyTexture(info.animaion.card.blue.frame6);
-            }
-        }
-        else if (type == CARD || type == CARDS) {
-            if (
-                /* Blue Cards: */
-                (info.animaion.card.blueIsLoaded ||   (info.animaion.card.blue.frame1IsLoaded   &&
-                                                       info.animaion.card.blue.frame2IsLoaded   &&
-                                                       info.animaion.card.blue.frame3IsLoaded   &&
-                                                       info.animaion.card.blue.frame4IsLoaded   &&
-                                                       info.animaion.card.blue.frame5IsLoaded   &&
-                                                       info.animaion.card.blue.frame6IsLoaded   ))
-                &&
-                /* White Cards: */
-                (info.animaion.card.whiteIsLoaded ||  (info.animaion.card.white.frame1IsLoaded  &&
-                                                       info.animaion.card.white.frame2IsLoaded  &&
-                                                       info.animaion.card.white.frame3IsLoaded  &&
-                                                       info.animaion.card.white.frame4IsLoaded  &&
-                                                       info.animaion.card.white.frame5IsLoaded  &&
-                                                       info.animaion.card.white.frame6IsLoaded  ))
-                &&
-                /* Yellow Cards: */
-                (info.animaion.card.yellowIsLoaded || (info.animaion.card.yellow.frame1IsLoaded &&
-                                                       info.animaion.card.yellow.frame2IsLoaded &&
-                                                       info.animaion.card.yellow.frame3IsLoaded &&
-                                                       info.animaion.card.yellow.frame4IsLoaded &&
-                                                       info.animaion.card.yellow.frame5IsLoaded &&
-                                                       info.animaion.card.yellow.frame6IsLoaded ))
-                &&
-                /* Red Cards: */
-                (info.animaion.card.redIsLoaded ||    (info.animaion.card.red.frame1IsLoaded    &&
-                                                       info.animaion.card.red.frame2IsLoaded    &&
-                                                       info.animaion.card.red.frame3IsLoaded    &&
-                                                       info.animaion.card.red.frame4IsLoaded    &&
-                                                       info.animaion.card.red.frame5IsLoaded    &&
-                                                       info.animaion.card.red.frame6IsLoaded    ))
-                )
-            {
-                /* Red Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.red.frame1);
-                SDL_DestroyTexture(info.animaion.card.red.frame2);
-                SDL_DestroyTexture(info.animaion.card.red.frame3);
-                SDL_DestroyTexture(info.animaion.card.red.frame4);
-                SDL_DestroyTexture(info.animaion.card.red.frame5);
-                SDL_DestroyTexture(info.animaion.card.red.frame6);
-                
-                /* Yellow Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.yellow.frame1);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame2);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame3);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame4);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame5);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame6);
-                
-                /* White Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.white.frame1);
-                SDL_DestroyTexture(info.animaion.card.white.frame2);
-                SDL_DestroyTexture(info.animaion.card.white.frame3);
-                SDL_DestroyTexture(info.animaion.card.white.frame4);
-                SDL_DestroyTexture(info.animaion.card.white.frame5);
-                SDL_DestroyTexture(info.animaion.card.white.frame6);
-                
-                /* Blue Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.blue.frame1);
-                SDL_DestroyTexture(info.animaion.card.blue.frame2);
-                SDL_DestroyTexture(info.animaion.card.blue.frame3);
-                SDL_DestroyTexture(info.animaion.card.blue.frame4);
-                SDL_DestroyTexture(info.animaion.card.blue.frame5);
-                SDL_DestroyTexture(info.animaion.card.blue.frame6);
-            }
-        }
-        else if (type == ALL) {
-            if ((
-                /* Blue card: */
-                (info.animaion.card.blueIsLoaded ||  (info.animaion.card.blue.frame1IsLoaded  &&
-                                                      info.animaion.card.blue.frame2IsLoaded  &&
-                                                      info.animaion.card.blue.frame3IsLoaded  &&
-                                                      info.animaion.card.blue.frame4IsLoaded  &&
-                                                      info.animaion.card.blue.frame5IsLoaded  &&
-                                                      info.animaion.card.blue.frame6IsLoaded  ))
-                &&
-                /* Walk: */
-                (info.animaion.walkIsLoaded ||       (info.animaion.walk.frame1IsLoaded       &&
-                                                      info.animaion.walk.frame2IsLoaded       &&
-                                                      info.animaion.walk.frame3IsLoaded       &&
-                                                      info.animaion.walk.frame4IsLoaded       &&
-                                                      info.animaion.walk.frame5IsLoaded       ))
-                &&
-                /* Run: */
-                (info.animaion.runIsLoaded ||        (info.animaion.run.frame1IsLoaded        &&
-                                                      info.animaion.run.frame2IsLoaded        &&
-                                                      info.animaion.run.frame3IsLoaded        &&
-                                                      info.animaion.run.frame4IsLoaded        &&
-                                                      info.animaion.run.frame5IsLoaded        ))
-                &&
-                /* Red Card: */
-                (info.animaion.card.redIsLoaded ||   (info.animaion.card.red.frame1IsLoaded   &&
-                                                      info.animaion.card.red.frame2IsLoaded   &&
-                                                      info.animaion.card.red.frame3IsLoaded   &&
-                                                      info.animaion.card.red.frame4IsLoaded   &&
-                                                      info.animaion.card.red.frame5IsLoaded   &&
-                                                      info.animaion.card.red.frame6IsLoaded   ))
-                &&
-                /* White Card: */
-                (info.animaion.card.whiteIsLoaded || (info.animaion.card.white.frame1IsLoaded &&
-                                                      info.animaion.card.white.frame2IsLoaded &&
-                                                      info.animaion.card.white.frame3IsLoaded &&
-                                                      info.animaion.card.white.frame4IsLoaded &&
-                                                      info.animaion.card.white.frame5IsLoaded &&
-                                                      info.animaion.card.white.frame6IsLoaded ))
-                &&
-                /* Blue Card: */
-                (info.animaion.card.blueIsLoaded ||  (info.animaion.card.blue.frame1IsLoaded  &&
-                                                      info.animaion.card.blue.frame2IsLoaded  &&
-                                                      info.animaion.card.blue.frame3IsLoaded  &&
-                                                      info.animaion.card.blue.frame4IsLoaded  &&
-                                                      info.animaion.card.blue.frame5IsLoaded  &&
-                                                      info.animaion.card.blue.frame6IsLoaded  ))
-                )
-                ||
-                info.allAnimationsAreLoaded
-                )
-            {
-                /* Walk Frames: */
-                SDL_DestroyTexture(info.animaion.walk.frame1);
-                SDL_DestroyTexture(info.animaion.walk.frame2);
-                SDL_DestroyTexture(info.animaion.walk.frame3);
-                SDL_DestroyTexture(info.animaion.walk.frame4);
-                SDL_DestroyTexture(info.animaion.walk.frame5);
-                
-                /* Run Frames: */
-                SDL_DestroyTexture(info.animaion.run.frame1);
-                SDL_DestroyTexture(info.animaion.run.frame2);
-                SDL_DestroyTexture(info.animaion.run.frame3);
-                SDL_DestroyTexture(info.animaion.run.frame4);
-                SDL_DestroyTexture(info.animaion.run.frame5);
-                
-                /* Red Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.red.frame1);
-                SDL_DestroyTexture(info.animaion.card.red.frame2);
-                SDL_DestroyTexture(info.animaion.card.red.frame3);
-                SDL_DestroyTexture(info.animaion.card.red.frame4);
-                SDL_DestroyTexture(info.animaion.card.red.frame5);
-                SDL_DestroyTexture(info.animaion.card.red.frame6);
-                
-                /* Yellow Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.yellow.frame1);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame2);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame3);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame4);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame5);
-                SDL_DestroyTexture(info.animaion.card.yellow.frame6);
-                
-                /* White Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.white.frame1);
-                SDL_DestroyTexture(info.animaion.card.white.frame2);
-                SDL_DestroyTexture(info.animaion.card.white.frame3);
-                SDL_DestroyTexture(info.animaion.card.white.frame4);
-                SDL_DestroyTexture(info.animaion.card.white.frame5);
-                SDL_DestroyTexture(info.animaion.card.white.frame6);
-                
-                /* Blue Card Frames: */
-                SDL_DestroyTexture(info.animaion.card.blue.frame1);
-                SDL_DestroyTexture(info.animaion.card.blue.frame2);
-                SDL_DestroyTexture(info.animaion.card.blue.frame3);
-                SDL_DestroyTexture(info.animaion.card.blue.frame4);
-                SDL_DestroyTexture(info.animaion.card.blue.frame5);
-                SDL_DestroyTexture(info.animaion.card.blue.frame6);
-            }
-        }
-        else {
-            if (debugMode)
-            error("Error not a valid type! (Tried to unload texture)\n");
-        }
-    }
     
+    ~human() {
+        if (info.Texture) SDL_DestroyTexture(info.Texture);
+        if (info.animaion.walk.frame1) SDL_DestroyTexture(info.animaion.walk.frame1);
+        if (info.animaion.walk.frame2) SDL_DestroyTexture(info.animaion.walk.frame2);
+        if (info.animaion.walk.frame3) SDL_DestroyTexture(info.animaion.walk.frame3);
+        if (info.animaion.walk.frame4) SDL_DestroyTexture(info.animaion.walk.frame4);
+        if (info.animaion.walk.frame5) SDL_DestroyTexture(info.animaion.walk.frame5);
+        if (info.animaion.run.frame1) SDL_DestroyTexture(info.animaion.run.frame1);
+        if (info.animaion.run.frame2) SDL_DestroyTexture(info.animaion.run.frame2);
+        if (info.animaion.run.frame3) SDL_DestroyTexture(info.animaion.run.frame3);
+        if (info.animaion.run.frame4) SDL_DestroyTexture(info.animaion.run.frame4);
+        if (info.animaion.run.frame5) SDL_DestroyTexture(info.animaion.run.frame5);
+        if (info.animaion.card.red.frame1) SDL_DestroyTexture(info.animaion.card.red.frame1);
+        if (info.animaion.card.red.frame2) SDL_DestroyTexture(info.animaion.card.red.frame2);
+        if (info.animaion.card.red.frame3) SDL_DestroyTexture(info.animaion.card.red.frame3);
+        if (info.animaion.card.red.frame4) SDL_DestroyTexture(info.animaion.card.red.frame4);
+        if (info.animaion.card.red.frame5) SDL_DestroyTexture(info.animaion.card.red.frame5);
+        if (info.animaion.card.red.frame6) SDL_DestroyTexture(info.animaion.card.red.frame6);
+        if (info.animaion.card.yellow.frame1) SDL_DestroyTexture(info.animaion.card.yellow.frame1);
+        if (info.animaion.card.yellow.frame2) SDL_DestroyTexture(info.animaion.card.yellow.frame2);
+        if (info.animaion.card.yellow.frame3) SDL_DestroyTexture(info.animaion.card.yellow.frame3);
+        if (info.animaion.card.yellow.frame4) SDL_DestroyTexture(info.animaion.card.yellow.frame4);
+        if (info.animaion.card.yellow.frame5) SDL_DestroyTexture(info.animaion.card.yellow.frame5);
+        if (info.animaion.card.yellow.frame6) SDL_DestroyTexture(info.animaion.card.yellow.frame6);
+        if (info.animaion.card.white.frame1) SDL_DestroyTexture(info.animaion.card.white.frame1);
+        if (info.animaion.card.white.frame2) SDL_DestroyTexture(info.animaion.card.white.frame2);
+        if (info.animaion.card.white.frame3) SDL_DestroyTexture(info.animaion.card.white.frame3);
+        if (info.animaion.card.white.frame4) SDL_DestroyTexture(info.animaion.card.white.frame4);
+        if (info.animaion.card.white.frame5) SDL_DestroyTexture(info.animaion.card.white.frame5);
+        if (info.animaion.card.white.frame6) SDL_DestroyTexture(info.animaion.card.white.frame6);
+        if (info.animaion.card.blue.frame1) SDL_DestroyTexture(info.animaion.card.blue.frame1);
+        if (info.animaion.card.blue.frame2) SDL_DestroyTexture(info.animaion.card.blue.frame2);
+        if (info.animaion.card.blue.frame3) SDL_DestroyTexture(info.animaion.card.blue.frame3);
+        if (info.animaion.card.blue.frame4) SDL_DestroyTexture(info.animaion.card.blue.frame4);
+        if (info.animaion.card.blue.frame5) SDL_DestroyTexture(info.animaion.card.blue.frame5);
+        if (info.animaion.card.blue.frame6) SDL_DestroyTexture(info.animaion.card.blue.frame6);
+    }
     
     void nextFrame() {
         resizeForFrame(currentShownFrame);
@@ -2055,11 +1688,22 @@ public:
     
     field(string importedSpriteName) {
         spriteName = importedSpriteName;
+        initTextures();
     }
     
     void init(string importedSpriteName) {
         spriteName = importedSpriteName;
+        initTextures();
         goTo(0, 0);
+    }
+    
+    void initTextures() {
+        info.textures.normal.normal = nullptr;
+        info.textures.normal.snow = nullptr;
+        info.textures.normal.rain = nullptr;
+        info.textures.debug.normal = nullptr;
+        info.textures.debug.snow = nullptr;
+        info.textures.debug.rain = nullptr;
     }
     
     void goTo(int x, int y) {
@@ -2079,10 +1723,13 @@ public:
         }
     }
     
-    void unload(fieldType type) {
-        if (type == DEBUG_FIELD) {
-            SDL_DestroyTexture(info.textures.debug.normal);
-        }
+    ~field() {
+        if (info.textures.debug.normal) SDL_DestroyTexture(info.textures.debug.normal);
+        if (info.textures.normal.normal) SDL_DestroyTexture(info.textures.normal.normal);
+        if (info.textures.normal.snow) SDL_DestroyTexture(info.textures.normal.snow);
+        if (info.textures.normal.rain) SDL_DestroyTexture(info.textures.normal.rain);
+        if (info.textures.debug.snow) SDL_DestroyTexture(info.textures.debug.snow);
+        if (info.textures.debug.rain) SDL_DestroyTexture(info.textures.debug.rain);
     }
     
     void alphaDisplay(fieldType type) {
@@ -2158,11 +1805,49 @@ public:
     string spriteName;
     int worldX = 0;
     int worldY = 0;
+    double mometeum = 0;
+    int targetX = 0;
+    int targetY = 0;
     ballSprite info;
+    int &currentX = info.rect.x;
+    int &currentY = info.rect.y;
+    
+    void setFacingDirection(int x, int y) {
+        targetX = x;
+        targetY = y;
+    }
+    
+    void updateLocation() {
+        if (targetX >= currentX && targetY >= currentY) {
+            worldX += mometeum;
+            worldY += mometeum;
+        }
+        else if (targetX <= currentX && targetY >= currentY) {
+            worldX -= mometeum;
+            worldY += mometeum;
+        }
+        else if (targetX <= currentX && targetY <= currentY) {
+            worldX -= mometeum;
+            worldY -= mometeum;
+        }
+        else if (targetX >= currentX && targetY <= currentY) {
+            worldX += mometeum;
+            worldY -= mometeum;
+        }
+    }
     
     ball(string importedSpriteName) {
         spriteName = importedSpriteName;
+        initTexture();
         goTo(0, 0);
+        info.rect.x = 0;
+        info.rect.y = 0;
+        info.rect.h = 0;
+        info.rect.w = 0;
+    }
+    
+    void initTexture() {
+        info.texture = nullptr;
     }
     
     void goTo(int x, int y) {
@@ -2182,10 +1867,8 @@ public:
         }
     }
     
-    void unload(ballType type) {
-        if (type == DEBUG_BALL) {
-            SDL_DestroyTexture(info.texture);
-        }
+    ~ball() {
+        if (info.texture) SDL_DestroyTexture(info.texture);
     }
     
     void alphaDisplay(ballType type) {
@@ -2315,6 +1998,7 @@ int main() {
       -----------------------------------------------*/
     
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  /* Add this BEFORE creating textures */
+    
     /*
      Load sprites:
      */
@@ -2454,6 +2138,10 @@ int main() {
         debugPlayer.updateWidthHeight();
         debugBall.updateWidthHeight();
         
+        debugBall.setFacingDirection(mouseX, mouseY);
+        debugBall.mometeum = 1;
+        debugBall.updateLocation();
+        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
         /* Rendering Each Sprite: */
@@ -2469,14 +2157,9 @@ int main() {
         keyPressed = KEY_NONE;
     }
     printInfo("\nExited loop\n");
+    
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    importantInfo("debugSprite Unloading...\n");
-    debugField.unload(DEBUG_FIELD);
-    importantInfo("debugPlayer Unloading...\n");
-    debugPlayer.unload(NORMAL);
-    importantInfo("debugBall Unloading...\n");
-    debugBall.unload(DEBUG_BALL);
     
     double largestFPS = largestFPSlist[0];
     for (double num : largestFPSlist) {
