@@ -1989,7 +1989,7 @@ int main() {
     printInfo("Game Size:   " + toString(screenSize.gameWidth) + " x " + toString(screenSize.gameHeight) + "\n");
     printInfo("Pixels: " + toString(screenSize.pixels) + "\n");
     
-    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
+    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/11/2026";
     
     window = SDL_CreateWindow(windowName.c_str(),
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
