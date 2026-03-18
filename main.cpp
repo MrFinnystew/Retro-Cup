@@ -52,6 +52,9 @@ Notes are set up like C++
 #include <limits>
 #include <cmath>
 #include <unordered_map>
+#include <fstream>
+#include <filesystem>
+#include <cstdlib>
 
 #include "Color Text.hpp"
 #include "Audio/Audio Engine.hpp"
@@ -351,7 +354,11 @@ int pixelsPerGamePixels;
 bool debugMode = true;
 int loopNumber = 0;
 double currentFPS;
+string operatingSystem;
 vector<double> largestFPSlist = {};
+bool updateRenderingOnResize = true;
+bool muted = false;
+Audio audio(&muted);
 
 /*-----------------------------------------------------------------
   -----------------------------Functions---------------------------
@@ -384,6 +391,11 @@ void importantInfo(string info) {
 void printEndInfo(string info, auto value) {
     if (debugMode)
         cout << info << (startText+startBoldText+redText+endText) << value << (resetText) << endl;
+}
+
+void printBold(auto value) {
+    if (debugMode)
+        cout << (startText+startBoldText+endText) << value << (resetText);
 }
 
 int RandomInt(int low, int high) {
@@ -568,6 +580,28 @@ void updateFPS() {
     }
 }
 
+void foucusWindow() {
+    if (operatingSystem == "Apple"){
+        SDL_RestoreWindow(window);
+        SDL_RaiseWindow(window);
+    }
+    else {
+        if (SDL_SetWindowInputFocus(window) != 0) {
+            warrning(std::string("Failed to focus window: ") + SDL_GetError() + "\n");
+        }
+    }
+}
+
+void unmute() {
+    muted = false;
+    audio.syncMuted();
+}
+
+void mute() {
+    muted = true;
+    audio.syncMuted();
+}
+
 class Camrea {
 public:
     double zoom;
@@ -585,6 +619,36 @@ public:
         importantInfo("Zoom is now: " + toString(zoom) + "\n");
     }
 };
+
+/*
+ Saving fuctions
+ */
+
+void writeIntToFile(std::ofstream& file, int data) {
+    file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+}
+
+void writeDoubleToFile(std::ofstream& file, double data) {
+    file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+}
+
+string getSaveFilePath() {
+    const char* homePath = std::getenv("HOME");
+    if (homePath == nullptr) {
+        return "save.bin";
+    }
+    
+    std::filesystem::path saveDirectory = std::filesystem::path(homePath) /
+        "Library" / "Application Support" / "Retro Cup";
+    
+    std::error_code errorCode;
+    std::filesystem::create_directories(saveDirectory, errorCode);
+    if (errorCode) {
+        return "save.bin";
+    }
+    
+    return (saveDirectory / "save.bin").string();
+}
 
 /*-----------------------------------------------------------------
   -------------------------Global Varriables #2--------------------
@@ -1803,8 +1867,8 @@ class ball {
 public:
     ballType currentShownFrame = NONE_BALL;
     string spriteName;
-    int worldX = 0;
-    int worldY = 0;
+    double worldX = 0;
+    double worldY = 0;
     double mometeum = 0;
     int targetX = 0;
     int targetY = 0;
@@ -1834,6 +1898,9 @@ public:
             worldX += mometeum;
             worldY -= mometeum;
         }
+        else {
+            return;
+        }
     }
     
     ball(string importedSpriteName) {
@@ -1844,10 +1911,6 @@ public:
         info.rect.y = 0;
         info.rect.h = 0;
         info.rect.w = 0;
-    }
-    
-    void initTexture() {
-        info.texture = nullptr;
     }
     
     void initTexture() {
@@ -1948,11 +2011,11 @@ public:
 
 int main() {
 #if defined(__APPLE__)
-    string operatingSystem = "Apple";
+    operatingSystem = "Apple";
 #elif defined(__linux__)
-    string operatingSystem = "Linux";
+    operatingSystem = "Linux";
 #elif defined(_WIN32)
-    string operatingSystem = "Windows";
+    operatingSystem = "Windows";
 #else
     error("Operating System not allowed.\nError\n\nPlease Contact: yuel.cheong@gmail.com");
     operatingSystem = "Not allowed";
@@ -1963,7 +2026,7 @@ int main() {
     /*
      Audio stuff:
      */
-    Audio audio;
+    mute();
     audio.load("debugMusic", "/Users/yec/Documents/Retro Cup/Retro Cup/Audio/Sounds/Arrow (Instrumental).mp3");
     audio.setLoop("debugMusic", true);
     audio.setVolume("debugMusic", 1.0f);
@@ -1973,33 +2036,34 @@ int main() {
      -----------------Load Window-------------------
      -----------------------------------------------*/
     
-    printInfo("Initializing...\n");
+    printBold("Initializing...\n");
     
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  /* Pixel-perfect rendering */
     
     /* Width: 444, Height: 690 (Height is automaticly caculated by the function) */
-    rectangle screenSize = getScreenSize(444);
+    int wantedWidthPixels = 444;
+    rectangle screenSize = getScreenSize(wantedWidthPixels);
     pixelsPerGamePixels = screenSize.pixels;
-    cout << endl << "-----------------------------------------------" << endl << endl;
-
+    
+    printBold("Screen Info:");
     printInfo("Screen Size: " + toString(screenSize.originalWidth) + " x " + toString(screenSize.originalHeight) + "\n");
     printInfo("Window Size: " + toString(screenSize.width) + " x " + toString(screenSize.height) + "\n");
     printInfo("Game Size:   " + toString(screenSize.gameWidth) + " x " + toString(screenSize.gameHeight) + "\n");
     printInfo("Pixels: " + toString(screenSize.pixels) + "\n");
     
-    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/11/2026";
+    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
     
     window = SDL_CreateWindow(windowName.c_str(),
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              screenSize.width, screenSize.height, SDL_WINDOW_SHOWN);
+                              screenSize.width, screenSize.height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); /* SDL_RENDERER_ACCELERATED */
     
     /*-----------------------------------------------
-      -----------------Loaded Window-----------------
-      -----------------------------------------------*/
+     -----------------Loaded Window-----------------
+     -----------------------------------------------*/
     
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  /* Add this BEFORE creating textures */
     
@@ -2026,7 +2090,7 @@ int main() {
     
     debugPlayer.alphaGoTo(0, 0);
     debugField.alphaGoTo(0, 0);
-        
+    
     bool WindowShouldClose = false;
     SDL_Event event;
     bool IsPrintLoop = false;
@@ -2040,13 +2104,13 @@ int main() {
      |Entering loop...|
      |________________|
      */
-    
+    printBold("Entering Loop...\n");
     while (!WindowShouldClose) {
         loopNumber ++;
         updateFPS();
         
         if (debugMode)
-        IsPrintLoop = isCommonMultiple(loopNumber,120);
+            IsPrintLoop = isCommonMultiple(loopNumber,120);
         /* Only shows every 120 loops */
         if (IsPrintLoop) {
             cout <<
@@ -2089,6 +2153,33 @@ int main() {
                         break;
                 }
             }
+            if (event.type == SDL_WINDOWEVENT) {
+                // Check the specific window event
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_RESIZED:
+                        printInfo("Window resized to: " + std::to_string(event.window.data1) + "x" + std::to_string(event.window.data2) + "\n");
+                        break;
+                    case SDL_WINDOWEVENT_ENTER:
+                        warrning("Mouse entered window\n");
+                        break;
+                    case SDL_WINDOWEVENT_LEAVE:
+                        warrning("Mouse left window\n");
+                        break;
+                    case SDL_WINDOWEVENT_MINIMIZED:
+                        warrning("Window minamized\n");
+                        break;
+                    case SDL_APP_DIDENTERFOREGROUND:
+                        SDL_RestoreWindow(window);
+                        SDL_RaiseWindow(window);
+                        break;
+                    case SDL_WINDOWEVENT_FOCUS_GAINED:
+                        warrning("Window foucsed\n");
+                        break;
+                    case SDL_WINDOWEVENT_FOCUS_LOST:
+                        warrning("Window unfoucused\n");
+                        break;
+                }
+            }
             if (event.type == SDL_MOUSEMOTION) {
                 mouseX = event.motion.x;
                 mouseY = event.motion.y;
@@ -2100,6 +2191,7 @@ int main() {
                     int mouseY = event.button.y;
                     if (debugMode)
                         printInfo("Clicked at: " + toString(mouseX) + ", " + toString(mouseY) + "\n");
+                    debugBall.setFacingDirection(mouseX, mouseY);
                 }
             }
         }
@@ -2142,12 +2234,12 @@ int main() {
         debugPlayer.updateWidthHeight();
         debugBall.updateWidthHeight();
         
-        debugBall.setFacingDirection(mouseX, mouseY);
-        debugBall.mometeum = 1;
+        debugBall.mometeum = 10;
         debugBall.updateLocation();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
         SDL_RenderClear(renderer); /* Clear the screen  */
+        
         /* Rendering Each Sprite: */
         debugField.alphaDisplay(DEBUG_FIELD);
         debugPlayer.alphaDisplay(NORMAL);
@@ -2160,10 +2252,24 @@ int main() {
          */
         keyPressed = KEY_NONE;
     }
-    printInfo("\nExited loop\n");
+    printBold("\nExited loop\n");
     
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    
+    /*
+     Saving data:
+     */
+    
+    /*
+     std::ofstream saveFile(getSaveFilePath(), std::ios::out | std::ios::binary);
+     if (!saveFile.is_open()) {
+     error("Error opening file!\n");
+     return 1;
+     }
+     
+     writeIntToFile(saveFile, 12);
+     */
     
     double largestFPS = largestFPSlist[0];
     for (double num : largestFPSlist) {
@@ -2179,24 +2285,27 @@ int main() {
         }
     }
     
-    print( (string)"\n\n\n--------------------------------------------------" + "\n" +
-                   "-----------------Ending information---------------" + "\n" +
-                   "--------------------------------------------------" + "\n");
+    printBold( (string)"\n\n\n--------------------------------------------------" + "\n" +
+          "-----------------Ending information---------------" + "\n" +
+          "--------------------------------------------------" + "\n");
     printEndInfo("Highest FPS:         ", largestFPS);
     printEndInfo("Lowest FPS:          ", lowestFPS);
     printEndInfo("Ending Camrea state: ", ("{" + std::to_string(camrea.zoom) + "," + std::to_string(camrea.x) + "," + std::to_string(camrea.y) + "}"));
-        // -------------------------
-        // -------------------------
-        // --------------------------------------------------
-    print("\n                  Sprite States:                  \n");
-    printEndInfo("debugPlayer State:   ", ("{" + std::to_string(debugPlayer.info.rect.x) + "," + std::to_string(debugPlayer.info.rect.y) + "," + std::to_string(debugPlayer.info.rect.h) + "," + std::to_string(debugPlayer.info.rect.w) + "}"));
-    printEndInfo("debugField State:    ", ("{" + std::to_string(debugField.info.rect.x) + "," + std::to_string(debugField.info.rect.y) + "," + std::to_string(debugField.info.rect.h) + "," + std::to_string(debugField.info.rect.w) + "}"));
-    printEndInfo("debugBall State:     ", ("{" + std::to_string(debugBall.info.rect.x) + "," + std::to_string(debugBall.info.rect.y) + "," + std::to_string(debugBall.info.rect.h) + "," + std::to_string(debugBall.info.rect.w) + "}"));
+    // -------------------------
+    // -------------------------
+    // --------------------------------------------------
+    printBold("\n                  Window State:\n");
+    printEndInfo("Screen Size: ", ("{" + std::to_string(screenSize.width) + "," + std::to_string(screenSize.height) + "}\n"));
+    printBold("\n                  Sprite States:\n");
+    printEndInfo("debugPlayer State:         ", ("{" + std::to_string(debugPlayer.info.rect.x) + "," + std::to_string(debugPlayer.info.rect.y) + "," + std::to_string(debugPlayer.info.rect.h) + "," + std::to_string(debugPlayer.info.rect.w) + "}"));
+    printEndInfo("debugField State:          ", ("{" + std::to_string(debugField.info.rect.x) + "," + std::to_string(debugField.info.rect.y) + "," + std::to_string(debugField.info.rect.h) + "," + std::to_string(debugField.info.rect.w) + "}"));
+    printEndInfo("debugBall State:           ", ("{" + std::to_string(debugBall.info.rect.x) + "," + std::to_string(debugBall.info.rect.y) + "," + std::to_string(debugBall.info.rect.h) + "," + std::to_string(debugBall.info.rect.w) + "}"));
+    printEndInfo("debugBall Facing Direction:", ("{" + std::to_string(debugBall.targetX) + "," + std::to_string(debugBall.targetY) + "}\n"));
     
     warrning("\nENDING PROGRAM...\n\n\n\n");
     
     IMG_Quit();
     SDL_Quit();
-     
+    
     return 0;
 }
