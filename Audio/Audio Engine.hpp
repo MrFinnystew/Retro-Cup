@@ -13,9 +13,16 @@
 
 class Audio {
 public:
-    Audio() {
+    Audio() : Audio(false) {}
+    Audio(bool isMuted) : m_muted(isMuted) {
         if (ma_engine_init(NULL, &m_engine) != MA_SUCCESS)
             throw std::runtime_error("Failed to initialize audio engine");
+        applyMasterVolume();
+    }
+    Audio(bool *mutedPtr) : m_mutedPtr(mutedPtr), m_muted(mutedPtr != nullptr ? *mutedPtr : false) {
+        if (ma_engine_init(NULL, &m_engine) != MA_SUCCESS)
+            throw std::runtime_error("Failed to initialize audio engine");
+        applyMasterVolume();
     }
 
     ~Audio() {
@@ -53,9 +60,22 @@ public:
 
     void setMasterVolume(float vol) {
         m_volume = vol;
-        ma_engine_set_volume(&m_engine, vol);
+        applyMasterVolume();
     }
     float getMasterVolume() const { return m_volume; }
+    void setMuted(bool muted) {
+        if (m_mutedPtr != nullptr)
+            *m_mutedPtr = muted;
+        m_muted = muted;
+        applyMasterVolume();
+    }
+    bool isMuted() const { return m_muted; }
+    void syncMuted() {
+        if (m_mutedPtr == nullptr)
+            return;
+        m_muted = *m_mutedPtr;
+        applyMasterVolume();
+    }
 
 private:
     struct SoundData {
@@ -75,5 +95,12 @@ private:
 
     ma_engine m_engine;
     float m_volume = 1.0f;
+    bool m_muted = false;
+    bool *m_mutedPtr = nullptr;
     std::unordered_map<std::string, std::unique_ptr<SoundData>> m_sounds;
+
+    void applyMasterVolume() {
+        bool muted = m_mutedPtr != nullptr ? *m_mutedPtr : m_muted;
+        ma_engine_set_volume(&m_engine, muted ? 0.0f : m_volume);
+    }
 };

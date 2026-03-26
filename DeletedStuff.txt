@@ -1,0 +1,101 @@
+Old Functions:
+
+/*
+humanSprite CreateFullscreenField(string pathToFile, SDL_Window* window, SDL_Renderer* renderer, humanSprite& sprite) {
+    sprite.Texture = createFieldTexture(pathToFile, renderer);
+    int texW = 0, texH = 0;
+    SDL_QueryTexture(sprite.Texture, NULL, NULL, &texW, &texH);
+    sprite.spriteWidth = texW;
+    sprite.spriteHeight = texH;
+    sprite.rect = {0, 0, texW, texH};
+    betaConvertFieldDimentionsToFullScreen(sprite.Texture, sprite);
+    return sprite;
+}
+
+
+Sprite CreatePlayer(string pathToFile, SDL_Renderer* renderer, Sprite& fieldSprite) {
+    Sprite playerSprite;
+    
+    // Load texture
+    playerSprite.Texture = IMG_LoadTexture(renderer, pathToFile.c_str());
+    
+    if (!playerSprite.Texture) {
+        cout << "Failed to load player: " << IMG_GetError() << "\n";
+        return playerSprite;
+    }
+    
+    // Get original player image dimensions
+    int originalPlayerWidth, originalPlayerHeight;
+    SDL_QueryTexture(playerSprite.Texture, NULL, NULL, &originalPlayerWidth, &originalPlayerHeight);
+    
+    // Get original field image dimensions (before scaling)
+    int originalFieldWidth, originalFieldHeight;
+    SDL_QueryTexture(fieldSprite.Texture, NULL, NULL, &originalFieldWidth, &originalFieldHeight);
+    
+    // Calculate the field's scale factor (use width scale only to maintain aspect ratio)
+    float fieldScale = round((float)fieldSprite.rect.w / (float)originalFieldWidth);
+    
+    // Apply the same scale to BOTH player dimensions
+    int playerWidth = (int)(originalPlayerWidth * fieldScale);
+    int playerHeight = (int)(originalPlayerHeight * fieldScale);
+    
+    // Set up the sprite
+    playerSprite.spriteWidth = playerWidth;
+    playerSprite.spriteHeight = playerHeight;
+    playerSprite.rect = {0, 0, playerWidth, playerHeight};
+    playerSprite.pathToFile = pathToFile;
+    
+    cout << "Player created at matching pixel scale: " << playerWidth << "x" << playerHeight << "\n";
+    cout << "Scale factor: " << fieldScale << "x\n";
+    
+    return playerSprite;
+}
+
+void centerSpriteOnField(Sprite& playerSprite, Sprite& fieldSprite) {
+    playerSprite.rect.x = fieldSprite.rect.x + (fieldSprite.rect.w / 2) - (playerSprite.rect.w / 2);
+    playerSprite.rect.y = fieldSprite.rect.y + (fieldSprite.rect.h / 2) - (playerSprite.rect.h / 2);
+}
+
+float getSpriteScale(Sprite& sprite) {
+    int originalWidth, originalHeight;
+    SDL_QueryTexture(sprite.Texture, NULL, NULL, &originalWidth, &originalHeight);
+    
+    float scaleX = (float)sprite.rect.w / (float)originalWidth;
+    
+    return scaleX;  // Returns how many game pixels per image pixel
+}
+
+SDL_Texture* createFieldTexture(string pathToFile, SDL_Renderer* renderer) {
+    SDL_Texture* texture = IMG_LoadTexture(renderer, pathToFile.c_str());
+    
+    if (!texture) {
+        cout << "Failed to load: " << IMG_GetError() << "\n";
+        return nullptr;
+    }
+    return texture;
+}
+
+void betaConvertFieldDimentionsToFullScreen(SDL_Texture* texture, humanSprite& sprite) {
+    int imgH = sprite.spriteHeight;
+    int imgW = sprite.spriteWidth;
+    // Get screen size
+    SDL_DisplayMode displayMode;
+    SDL_GetCurrentDisplayMode(0, &displayMode);
+    int screenWidth = displayMode.w;
+    int screenHeight = displayMode.h;
+    
+    SDL_QueryTexture(texture, NULL, NULL, &imgW, &imgH);
+    cout << "Image: " << imgW << "x" << imgH << "\n";
+    
+    // Calculate scaled size
+    float ratio = (float)imgH / (float)imgW;
+    int newW = screenWidth;
+    int newH = (int)(screenWidth * ratio);
+    int yPos = (screenHeight - newH) / 2;
+    
+    sprite.rect.w = newW;
+    sprite.rect.h = newH;
+    sprite.rect.x = 0;
+    sprite.rect.y = yPos;
+}
+*/

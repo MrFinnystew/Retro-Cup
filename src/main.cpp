@@ -56,8 +56,18 @@ Notes are set up like C++
 #include <filesystem>
 #include <cstdlib>
 
-#include "Color Text.hpp"
-#include "Audio/Audio Engine.hpp"
+#include "../audio/Audio Engine.hpp"
+#include "color text.hpp"
+
+#include "structs.hpp"
+#include "enums.hpp"
+#include "globals.hpp"
+#include "camrea.hpp"
+#include "renderer.hpp"
+#include "printing.hpp"
+#include "functions.hpp"
+
+#include "initialize.hpp"
 
 /* Are using these: */
 using
@@ -67,594 +77,6 @@ std::string,
 std::endl,
 std::vector,
 std::ctime;
-
-/*-----------------------------------------------------------------
-  --------------------------------Enums----------------------------
-  -----------------------------------------------------------------*/
-
-typedef enum {
-    KEY_NONE,
-    // Letters:
-    KEY_A,
-    KEY_B,
-    KEY_C,
-    KEY_D,
-    KEY_E,
-    KEY_F,
-    KEY_G,
-    KEY_H,
-    KEY_I,
-    KEY_J,
-    KEY_K,
-    KEY_L,
-    KEY_M,
-    KEY_N,
-    KEY_O,
-    KEY_P,
-    KEY_Q,
-    KEY_R,
-    KEY_S,
-    KEY_T,
-    KEY_U,
-    KEY_V,
-    KEY_W,
-    KEY_X,
-    KEY_Y,
-    KEY_Z,
-    
-    // Numbers:
-    KEY_1,
-    KEY_2,
-    KEY_3,
-    KEY_4,
-    KEY_5,
-    KEY_6,
-    KEY_7,
-    KEY_8,
-    KEY_9,
-    KEY_0,
-    
-    // Arrows:
-    KEY_UP,
-    KEY_DOWN,
-    KEY_LEFT,
-    KEY_RIGHT,
-    
-    // Other
-    KEY_SPACE,
-} Key;
-
-typedef enum {
-    /* Normal */
-    NORMAL,
-    
-    /* Walk */
-    WALK,
-    WALK_FRAME1,
-    WALK_FRAME2,
-    WALK_FRAME3,
-    WALK_FRAME4,
-    WALK_FRAME5,
-    
-    /* Run */
-    RUN,
-    RUN_FRAME1,
-    RUN_FRAME2,
-    RUN_FRAME3,
-    RUN_FRAME4,
-    RUN_FRAME5,
-    
-    /*
-     Cards:
-     */
-    CARD,
-    CARDS,
-    
-    /* Red */
-    CARD_RED,
-    CARD_RED_FRAME1,
-    CARD_RED_FRAME2,
-    CARD_RED_FRAME3,
-    CARD_RED_FRAME4,
-    CARD_RED_FRAME5,
-    CARD_RED_FRAME6,
-    
-    /* Yellow */
-    CARD_YELLOW,
-    CARD_YELLOW_FRAME1,
-    CARD_YELLOW_FRAME2,
-    CARD_YELLOW_FRAME3,
-    CARD_YELLOW_FRAME4,
-    CARD_YELLOW_FRAME5,
-    CARD_YELLOW_FRAME6,
-    
-    /* White */
-    CARD_WHITE,
-    CARD_WHITE_FRAME1,
-    CARD_WHITE_FRAME2,
-    CARD_WHITE_FRAME3,
-    CARD_WHITE_FRAME4,
-    CARD_WHITE_FRAME5,
-    CARD_WHITE_FRAME6,
-    
-    /* Blue */
-    CARD_BLUE,
-    CARD_BLUE_FRAME1,
-    CARD_BLUE_FRAME2,
-    CARD_BLUE_FRAME3,
-    CARD_BLUE_FRAME4,
-    CARD_BLUE_FRAME5,
-    CARD_BLUE_FRAME6,
-    
-    /* Other */
-    NONE,
-    ALL
-} animationType;
-
-typedef enum {
-    FIELD_NONE,
-    
-    DEBUG_FIELD,
-    DEBUG_FIELD_SNOW,
-    DEBUG_FIELD_RAIN,
-    
-    NORMAL_FIELD,
-    NORMAL_FIELD_SNOW,
-    NORMAL_FIELD_RAIN,
-} fieldType;
-
-typedef enum {
-    NONE_BALL,
-    
-    NORMAL_BALL,
-    DEBUG_BALL,
-} ballType;
-
-typedef enum {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    JUMP,
-} moveType;
-
-/*-----------------------------------------------------------------
-  ------------------------------Structs----------------------------
-  -----------------------------------------------------------------*/
-
-typedef struct COLOR {
-    int red;
-    int green;
-    int blue;
-    int transparency;
-} COLOR;
-
-typedef struct Item{
-    string itemName;
-    int x;
-    int y;
-} Item;
-
-typedef struct Sprite {
-    int spriteWidth;
-    int spriteHeight;
-    string pathToFile;
-    string fileName;
-    string uiFileName;
-    SDL_Texture* Texture;
-    SDL_Rect rect;
-} Sprite;
-
-typedef struct MoveAnimation {
-    SDL_Texture* frame1;
-    SDL_Texture* frame2;
-    SDL_Texture* frame3;
-    SDL_Texture* frame4;
-    SDL_Texture* frame5;
-    bool frame1IsLoaded;
-    bool frame2IsLoaded;
-    bool frame3IsLoaded;
-    bool frame4IsLoaded;
-    bool frame5IsLoaded;
-} MoveAnimation;
-
-typedef struct cardAnimation {
-    SDL_Texture* frame1;
-    SDL_Texture* frame2;
-    SDL_Texture* frame3;
-    SDL_Texture* frame4;
-    SDL_Texture* frame5;
-    SDL_Texture* frame6;
-    bool frame1IsLoaded;
-    bool frame2IsLoaded;
-    bool frame3IsLoaded;
-    bool frame4IsLoaded;
-    bool frame5IsLoaded;
-    bool frame6IsLoaded;
-} cardAnimation;
-
-typedef struct penaltyCardFrames {
-    cardAnimation red;
-    cardAnimation yellow;
-    cardAnimation white;
-    cardAnimation blue;
-    bool redIsLoaded;
-    bool yellowIsLoaded;
-    bool whiteIsLoaded;
-    bool blueIsLoaded;
-} penaltyCardFrames;
-
-typedef struct Animation {
-    MoveAnimation walk;
-    MoveAnimation run;
-    penaltyCardFrames card;
-    bool walkIsLoaded;
-    bool runIsLoaded;
-    bool cardsAreLoaded;
-} Animation;
-
-typedef struct humanSprite {
-    SDL_Texture* Texture;
-    bool normalTextureIsLoaded;
-    bool allAnimationsAreLoaded;
-    SDL_Rect rect;
-    bool yellowCard;
-    bool redCard;
-    bool blueCard;
-    Animation animaion;
-} humanInfo;
-
-typedef struct ballSprite {
-    SDL_Texture* texture;
-    bool textureIsLoaded;
-    SDL_Rect rect;
-} ballSprite;
-
-typedef struct individualFieldTexture {
-    SDL_Texture* normal;
-    bool normalIsLoaded;
-    SDL_Texture* snow;
-    bool snowIsLoaded;
-    SDL_Texture* rain;
-    bool rainIsLoaded;
-} individualFieldTexture;
-
-typedef struct fieldTextures {
-    individualFieldTexture normal;
-    bool normalIsLoaded;
-    individualFieldTexture debug;
-    bool debugIsLoaded;
-} fieldTextures;
-
-typedef struct fieldSprite {
-    string spriteName;
-    bool allFieldsAreLoaded;
-    
-    SDL_Rect rect;
-    fieldTextures textures;
-} fieldSprite;
-
-typedef struct rectangle {
-    int width;
-    int height;
-    int gameWidth;
-    int gameHeight;
-    int originalWidth;
-    int originalHeight;
-    int pixels;
-} rectangle;
-
-/*-----------------------------------------------------------------
-  -------------------------Global Varriables-----------------------
-  -----------------------------------------------------------------*/
-
-SDL_Renderer* renderer;
-SDL_Window* window;
-int pixelsPerGamePixels;
-bool debugMode = true;
-int loopNumber = 0;
-double currentFPS;
-string operatingSystem;
-vector<double> largestFPSlist = {};
-bool updateRenderingOnResize = true;
-bool muted = false;
-Audio audio(&muted);
-
-/*-----------------------------------------------------------------
-  -----------------------------Functions---------------------------
-  -----------------------------------------------------------------*/
-
-string toString(auto input) {
-    return std::to_string(input);
-}
-
-void error(string errorMessage) {
-    if (debugMode)
-        cout << (startText+startBoldText+redText+endText) << errorMessage << resetText;
-}
-
-void warrning(string warrningMessage) {
-    if (debugMode)
-        cout << (startText+startBoldText+yellowText+endText) << warrningMessage << resetText;
-}
-
-void printInfo(string info) {
-    if (debugMode)
-        cout << (startText+startBlueText+endText) << info << resetText;
-}
-
-void importantInfo(string info) {
-    if (debugMode)
-        cout << (startText+startBoldText+greenText+endText) << info << resetText;
-}
-
-void printEndInfo(string info, auto value) {
-    if (debugMode)
-        cout << info << (startText+startBoldText+redText+endText) << value << (resetText) << endl;
-}
-
-void printBold(auto value) {
-    if (debugMode)
-        cout << (startText+startBoldText+endText) << value << (resetText);
-}
-
-int RandomInt(int low, int high) {
-    static thread_local std::mt19937 gen(std::random_device{}());
-    std::uniform_int_distribution<int> distrib(low, high);
-    return distrib(gen);
-}
-
-void pauseMicroseconds(int microseconds) {
-    std::this_thread::sleep_for(std::chrono::microseconds(microseconds));
-}
-
-void pauseMilliseconds(int milliseconds) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-}
-
-void pauseSeconds(int seconds) {
-    std::this_thread::sleep_for(std::chrono::seconds(seconds));
-}
-
-void pauseMinutes(int minutes) {
-    std::this_thread::sleep_for(std::chrono::minutes(minutes));
-}
-
-void pauseHours(int hours) {
-    std::this_thread::sleep_for(std::chrono::hours(hours));
-}
-
-void pauseDays(int days) {
-    std::this_thread::sleep_for(std::chrono::days(days));
-}
-
-void pauseWeek(int weeks) {
-    std::this_thread::sleep_for(std::chrono::weeks(weeks));
-}
-
-void pauseMonth(int months) {
-    std::this_thread::sleep_for(std::chrono::months(months));
-}
-
-void pauseYear(int years) {
-    std::this_thread::sleep_for(std::chrono::years(years));
-}
-
-bool isCommonMultiple(int Number, int Multiple) {
-    if ((Number % Multiple) == 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-bool contains(string inputString, string contains) {
-    if (inputString.find(contains) != std::string::npos) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-rectangle getScreenSize(int widthPixels) {
-    SDL_DisplayMode displayMode;
-    if (SDL_GetDesktopDisplayMode(0, &displayMode) != 0) {
-        error("Error, could not get screen size due to error: " + (string)SDL_GetError() + "\n");
-    }
-    
-    rectangle builtInScreen;
-    builtInScreen.width = displayMode.w;
-    builtInScreen.height = displayMode.h;
-    printInfo("Built in screen: {" + std::to_string(builtInScreen.width) + "," + std::to_string(builtInScreen.height) + "}\n");
-    
-    /* MATH (Uggghhh...) */
-    
-    /* STEP ONE: */
-    rectangle stepOne;
-    stepOne.width = floor(builtInScreen.width/widthPixels);
-    stepOne.gameWidth = widthPixels;
-    
-    /* STEP TWO: */
-    rectangle stepTwo;
-    stepTwo.width = stepOne.width * widthPixels;
-    while (stepTwo.width < builtInScreen.width) {
-        stepOne.gameWidth += 1;
-        stepTwo.width += stepOne.width;
-        if (stepTwo.width > builtInScreen.width) {
-            stepTwo.width -= stepOne.width;
-            stepOne.gameWidth -= 1;
-        }
-    }
-    
-    /* STEP THREE: */
-    rectangle stepThree;
-    stepThree.width = stepTwo.width;
-        /* Calcuate the height. */
-    stepThree.height = floor(builtInScreen.height/stepOne.width) * stepOne.width;
-    stepOne.gameHeight = floor(builtInScreen.height/stepOne.width);
-    
-    /* Operating system (Need to take away menu bar amount if mac) */
-#if defined(__APPLE__)
-    if (stepOne.width == 1) {
-        stepThree.height -= 74;
-        stepOne.gameHeight -= 74;
-    }
-    else if (stepOne.width == 2) {
-        stepThree.height -= 76;
-        stepOne.gameHeight -= 38;
-    }
-    else if (stepOne.width == 3) {
-        stepThree.height -= 75;
-        stepOne.gameHeight -= 25;
-    }
-    else if (stepOne.width == 4) {
-        stepThree.height -= 72;
-        stepOne.gameHeight -= 18;
-    }
-    else if (stepOne.width == 5) {
-        stepThree.height -= 75;
-        stepOne.gameHeight -= 15;
-    }
-    else if (stepOne.width == 6) {
-        stepThree.height -= 72;
-        stepOne.gameHeight -= 12;
-    }
-    else if (stepOne.width == 7) {
-        stepThree.height -= 77;
-        stepOne.gameHeight -= 11;
-    }
-    else if (stepOne.width == 8) {
-        stepThree.height -= 72;
-        stepOne.gameHeight -= 9;
-    }
-    else if (stepOne.width == 9) {
-        stepThree.height -= 72;
-        stepOne.gameHeight -= 8;
-    }
-    else if (stepOne.width == 10) {
-        stepThree.height -= 70;
-        stepOne.gameHeight -= 7;
-    }
-#endif
-    
-    // Return the value:
-    rectangle returnRectange = stepThree;
-    returnRectange.originalHeight = builtInScreen.height;
-    returnRectange.originalWidth = builtInScreen.width;
-    returnRectange.pixels = stepOne.width;
-    returnRectange.gameHeight = stepOne.gameHeight;
-    returnRectange.gameWidth = stepOne.gameWidth;
-    return returnRectange;
-}
-
-void print(string str) {
-    if (debugMode) {
-        cout << str;
-    }
-}
-
-SDL_Texture* loadTexture(string path) {
-    SDL_Texture* raw = IMG_LoadTexture(renderer, path.c_str());
-    if (!raw) {
-        error("Failed to load texture: " + (string)IMG_GetError() + "\n");
-    }
-    return raw;
-}
-
-void updateFPS() {
-    static auto previousTime = std::chrono::high_resolution_clock::now();
-    static int frameCount = 0;
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    frameCount++;
-
-    std::chrono::duration<double> elapsed = currentTime - previousTime;
-
-    // Update the global variable only once per second
-    if (elapsed.count() >= 1.0) {
-        currentFPS = frameCount / elapsed.count();
-        frameCount = 0;
-        previousTime = currentTime;
-        largestFPSlist.push_back(currentFPS);
-    }
-}
-
-void foucusWindow() {
-    if (operatingSystem == "Apple"){
-        SDL_RestoreWindow(window);
-        SDL_RaiseWindow(window);
-    }
-    else {
-        if (SDL_SetWindowInputFocus(window) != 0) {
-            warrning(std::string("Failed to focus window: ") + SDL_GetError() + "\n");
-        }
-    }
-}
-
-void unmute() {
-    muted = false;
-    audio.syncMuted();
-}
-
-void mute() {
-    muted = true;
-    audio.syncMuted();
-}
-
-class Camrea {
-public:
-    double zoom;
-    double x, y;
-    
-    void zoomIn(float amount) {
-        importantInfo("Increasing zoom by: " + toString(amount) + "\n");
-        zoom += amount;
-        importantInfo("Zoom is now: " + toString(zoom) + "\n");
-    }
-    
-    void zoomOut(float amount) {
-        importantInfo("Decreasing zoom by: " + toString(amount) + "\n");
-        zoom -= amount;
-        importantInfo("Zoom is now: " + toString(zoom) + "\n");
-    }
-};
-
-/*
- Saving fuctions
- */
-
-void writeIntToFile(std::ofstream& file, int data) {
-    file.write(reinterpret_cast<const char*>(&data), sizeof(data));
-}
-
-void writeDoubleToFile(std::ofstream& file, double data) {
-    file.write(reinterpret_cast<const char*>(&data), sizeof(data));
-}
-
-string getSaveFilePath() {
-    const char* homePath = std::getenv("HOME");
-    if (homePath == nullptr) {
-        return "save.bin";
-    }
-    
-    std::filesystem::path saveDirectory = std::filesystem::path(homePath) /
-        "Library" / "Application Support" / "Retro Cup";
-    
-    std::error_code errorCode;
-    std::filesystem::create_directories(saveDirectory, errorCode);
-    if (errorCode) {
-        return "save.bin";
-    }
-    
-    return (saveDirectory / "save.bin").string();
-}
-
-/*-----------------------------------------------------------------
-  -------------------------Global Varriables #2--------------------
-  -----------------------------------------------------------------*/
-
-Camrea camrea;
 
 /*-----------------------------------------------------------------
   -----------------------------Classes-----------------------------
@@ -2010,62 +1432,12 @@ public:
   -----------------------------------------------------------------*/
 
 int main() {
-#if defined(__APPLE__)
-    operatingSystem = "Apple";
-#elif defined(__linux__)
-    operatingSystem = "Linux";
-#elif defined(_WIN32)
-    operatingSystem = "Windows";
-#else
-    error("Operating System not allowed.\nError\n\nPlease Contact: yuel.cheong@gmail.com");
-    operatingSystem = "Not allowed";
-    return -1;
-#endif
-    printInfo(operatingSystem+"\n");
+    debugMode = true;
+    loopNumber = 0;
+    updateRenderingOnResize = false;
+    muted = true;
     
-    /*
-     Audio stuff:
-     */
-    mute();
-    audio.load("debugMusic", "/Users/yec/Documents/Retro Cup/Retro Cup/Audio/Sounds/Arrow (Instrumental).mp3");
-    audio.setLoop("debugMusic", true);
-    audio.setVolume("debugMusic", 1.0f);
-    audio.playLoaded("debugMusic");
-    
-    /*-----------------------------------------------
-     -----------------Load Window-------------------
-     -----------------------------------------------*/
-    
-    printBold("Initializing...\n");
-    
-    SDL_Init(SDL_INIT_VIDEO);
-    IMG_Init(IMG_INIT_PNG);
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  /* Pixel-perfect rendering */
-    
-    /* Width: 444, Height: 690 (Height is automaticly caculated by the function) */
-    int wantedWidthPixels = 444;
-    rectangle screenSize = getScreenSize(wantedWidthPixels);
-    pixelsPerGamePixels = screenSize.pixels;
-    
-    printBold("Screen Info:");
-    printInfo("Screen Size: " + toString(screenSize.originalWidth) + " x " + toString(screenSize.originalHeight) + "\n");
-    printInfo("Window Size: " + toString(screenSize.width) + " x " + toString(screenSize.height) + "\n");
-    printInfo("Game Size:   " + toString(screenSize.gameWidth) + " x " + toString(screenSize.gameHeight) + "\n");
-    printInfo("Pixels: " + toString(screenSize.pixels) + "\n");
-    
-    string windowName = "Retro Cup | vAlpha 0.1.2 | Last updated: 3/1/2026";
-    
-    window = SDL_CreateWindow(windowName.c_str(),
-                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              screenSize.width, screenSize.height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); /* SDL_RENDERER_ACCELERATED */
-    
-    /*-----------------------------------------------
-     -----------------Loaded Window-----------------
-     -----------------------------------------------*/
-    
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");  /* Add this BEFORE creating textures */
+    init();
     
     /*
      Load sprites:
@@ -2073,20 +1445,16 @@ int main() {
     
     ball debugBall("debugBall");
     debugBall.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/ball/debugBall.png", DEBUG_BALL);
+    debugBall.mometeum = 1;
     
     field debugField("debugSprite");
     debugField.load("/Users/yec/Documents/Retro Cup/Retro Cup/.assets/field/debugField.png", DEBUG_FIELD);
     
     human debugPlayer("debugPlayer");
     debugPlayer.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
-    debugField.goTo(0, 0);
     
     human debugPlayerAI("debugPlayerAI");
     debugPlayerAI.loadAnimation(vector<string> {"/Users/yec/Documents/Retro Cup/Retro Cup/.assets/players/debugPlayer.png"}, NORMAL);
-    
-    camrea.x = 0;
-    camrea.y = 0;
-    camrea.zoom = 1;
     
     debugPlayer.alphaGoTo(0, 0);
     debugField.alphaGoTo(0, 0);
@@ -2097,7 +1465,7 @@ int main() {
     int mouseX = 0;
     int mouseY = 0;
     
-    Key keyPressed = KEY_NONE;
+    Key keyPressed = GAME_KEY_NONE;
     
     /*
      |----------------|
@@ -2124,32 +1492,32 @@ int main() {
             if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_w:
-                        keyPressed = KEY_W;
+                        keyPressed = GAME_KEY_W;
                         break;
                     case SDLK_UP:
-                        keyPressed = KEY_UP;
+                        keyPressed = GAME_KEY_UP;
                         break;
                     case SDLK_s:
-                        keyPressed = KEY_S;
+                        keyPressed = GAME_KEY_S;
                         break;
                     case SDLK_DOWN:
-                        keyPressed = KEY_DOWN;
+                        keyPressed = GAME_KEY_DOWN;
                         break;
                     case SDLK_a:
-                        keyPressed = KEY_A;
+                        keyPressed = GAME_KEY_A;
                         break;
                     case SDLK_LEFT:
-                        keyPressed = KEY_LEFT;
+                        keyPressed = GAME_KEY_LEFT;
                         break;
                     case SDLK_d:
-                        keyPressed = KEY_D;
+                        keyPressed = GAME_KEY_D;
                         break;
                     case SDLK_RIGHT:
-                        keyPressed = KEY_RIGHT;
+                        keyPressed = GAME_KEY_RIGHT;
                         break;
                     case SDLK_SPACE:
                         printInfo("Spacebar pressed\n");
-                        keyPressed = KEY_SPACE;
+                        keyPressed = GAME_KEY_SPACE;
                         break;
                 }
             }
@@ -2201,26 +1569,26 @@ int main() {
         /*
          ALPHA TESTING STUFF
          */
-        if (keyPressed == KEY_W) {
+        if (keyPressed == GAME_KEY_W) {
             //camrea.y += pixelsPerGamePixels;
             debugPlayer.alphaMove(UP);
         }
-        else if (keyPressed == KEY_A || keyPressed == KEY_LEFT) {
+        else if (keyPressed == GAME_KEY_A || keyPressed == GAME_KEY_LEFT) {
             //camrea.x += pixelsPerGamePixels;
             debugPlayer.alphaMove(LEFT);
         }
-        else if (keyPressed == KEY_S) {
+        else if (keyPressed == GAME_KEY_S) {
             //camrea.y -= pixelsPerGamePixels;
             debugPlayer.alphaMove(DOWN);
         }
-        else if (keyPressed == KEY_D || keyPressed == KEY_RIGHT) {
+        else if (keyPressed == GAME_KEY_D || keyPressed == GAME_KEY_RIGHT) {
             //camrea.x -= pixelsPerGamePixels;
             debugPlayer.alphaMove(RIGHT);
         }
-        else if (keyPressed == KEY_UP) {
+        else if (keyPressed == GAME_KEY_UP) {
             camrea.zoomIn(0.2);
         }
-        else if (keyPressed == KEY_DOWN) {
+        else if (keyPressed == GAME_KEY_DOWN) {
             camrea.zoomOut(0.2);
         }
         //camrea.zoomIn(0.01);
@@ -2234,7 +1602,6 @@ int main() {
         debugPlayer.updateWidthHeight();
         debugBall.updateWidthHeight();
         
-        debugBall.mometeum = 10;
         debugBall.updateLocation();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); /* Make the opacity max */
@@ -2250,7 +1617,7 @@ int main() {
         /*
          Reset the stuff
          */
-        keyPressed = KEY_NONE;
+        keyPressed = GAME_KEY_NONE;
     }
     printBold("\nExited loop\n");
     
@@ -2285,11 +1652,19 @@ int main() {
         }
     }
     
+    int lengthOfList = (int)largestFPSlist.size();
+    double addedUpNumber = 0;
+    for (double num : largestFPSlist) {
+        addedUpNumber += num;
+    }
+    double averageFPS = addedUpNumber/lengthOfList;
+    
     printBold( (string)"\n\n\n--------------------------------------------------" + "\n" +
           "-----------------Ending information---------------" + "\n" +
           "--------------------------------------------------" + "\n");
     printEndInfo("Highest FPS:         ", largestFPS);
     printEndInfo("Lowest FPS:          ", lowestFPS);
+    printEndInfo("Average FPS:         ", averageFPS);
     printEndInfo("Ending Camrea state: ", ("{" + std::to_string(camrea.zoom) + "," + std::to_string(camrea.x) + "," + std::to_string(camrea.y) + "}"));
     // -------------------------
     // -------------------------
@@ -2297,10 +1672,10 @@ int main() {
     printBold("\n                  Window State:\n");
     printEndInfo("Screen Size: ", ("{" + std::to_string(screenSize.width) + "," + std::to_string(screenSize.height) + "}\n"));
     printBold("\n                  Sprite States:\n");
-    printEndInfo("debugPlayer State:         ", ("{" + std::to_string(debugPlayer.info.rect.x) + "," + std::to_string(debugPlayer.info.rect.y) + "," + std::to_string(debugPlayer.info.rect.h) + "," + std::to_string(debugPlayer.info.rect.w) + "}"));
-    printEndInfo("debugField State:          ", ("{" + std::to_string(debugField.info.rect.x) + "," + std::to_string(debugField.info.rect.y) + "," + std::to_string(debugField.info.rect.h) + "," + std::to_string(debugField.info.rect.w) + "}"));
-    printEndInfo("debugBall State:           ", ("{" + std::to_string(debugBall.info.rect.x) + "," + std::to_string(debugBall.info.rect.y) + "," + std::to_string(debugBall.info.rect.h) + "," + std::to_string(debugBall.info.rect.w) + "}"));
-    printEndInfo("debugBall Facing Direction:", ("{" + std::to_string(debugBall.targetX) + "," + std::to_string(debugBall.targetY) + "}\n"));
+    printEndInfo("debugPlayer State:          ", ("{" + std::to_string(debugPlayer.info.rect.x) + "," + std::to_string(debugPlayer.info.rect.y) + "," + std::to_string(debugPlayer.info.rect.h) + "," + std::to_string(debugPlayer.info.rect.w) + "}"));
+    printEndInfo("debugField State:           ", ("{" + std::to_string(debugField.info.rect.x) + "," + std::to_string(debugField.info.rect.y) + "," + std::to_string(debugField.info.rect.h) + "," + std::to_string(debugField.info.rect.w) + "}"));
+    printEndInfo("debugBall State:            ", ("{" + std::to_string(debugBall.info.rect.x) + "," + std::to_string(debugBall.info.rect.y) + "," + std::to_string(debugBall.info.rect.h) + "," + std::to_string(debugBall.info.rect.w) + "}"));
+    printEndInfo("debugBall Facing Direction: ", ("{" + std::to_string(debugBall.targetX) + "," + std::to_string(debugBall.targetY) + "}\n"));
     
     warrning("\nENDING PROGRAM...\n\n\n\n");
     
