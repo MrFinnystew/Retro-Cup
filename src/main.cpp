@@ -19,7 +19,6 @@ Notes are set up like C++
  
  Visuals {
  SDL2
- For more about OpenGL go to OpenGl.com
  }
  
  notesForYu-El {
@@ -34,11 +33,11 @@ Notes are set up like C++
  
  READ THIS BEFORE CODING ON THIS DOCUMENT {
     def Sprite{
-        Sprite stands for a thing on the screen like the the field, the player, or the ref.
+        Sprite stands for a thing on the screen, like the field, the player, or the ref.
     }
     info {
-        We are using SDL2 for displaying and we are still deciding what to use for sound.
-        All comments are with muitiline comments.
+        We are using SDL2 for displaying, and we are still deciding what to use for sound.
+        All comments are with multiple-line comments.
     }
  }
  */
